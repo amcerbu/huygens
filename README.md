@@ -1,11 +1,27 @@
-# huygens
-a library for audio processing
+# Program notes
+Below are the technical and creative materials behind a composition for viola, cello, and electronics. 
+
+The piece aims to develop a single musical gesture: a gradual accumulation of sonic energy that "breaks" into a cascade of glassy, smooth sound. I'm drawing on an experience from August 2021, of swimming in the ocean near the Golden Gate Bridge, being picked up and knocked over by waves. 
+
+## The `scores` folder
+This folder contains pictures of different portions of the (ongoing) creative process. 
+
+1. `graphic`: an initial formal sketch / graphic score, with tabulation of sounds & techniques I was interested in exploring. 
+2. `experiment`: an experiment using some techniques I was interested in -- harmonics with overpressure, harmonic glissandi.
+3. `sectional draft`: a draft of the opening section of the piece; an expansion of the experiment. 
+4. `revision`: a revised formal sketch. 
 
 
-## Compiling and running projects:
-1. This project depends on `portaudio` (https://github.com/PortAudio/portaudio),  `RtMidi` (https://github.com/thestk/rtmidi), and `fftw3` (https://www.fftw.org/). All can be installed with a package manager such as `homebrew`.
+## The `doc`, `max`, `python`, `src`, and `tests` folders
+These folders contain the in-progress documentation and implementation of a library of C++ audio processing classes. The library classes themselves are all in the `src` directory. 
+
+Some of the scripts in `python` depend on `mido` and `numpy`, both of which can be installed using `pip`.
+
+
+## C++ dependencies; compiling and running:
+1. This project depends on `portaudio` (https://github.com/PortAudio/portaudio),  `RtMidi` (https://github.com/thestk/rtmidi), and `fftw3` (https://www.fftw.org/). All can be installed with a package manager such as `homebrew`. The project also depends on `tinyosc` (https://github.com/mhroth/tinyosc), which is used, at the author's suggestion, by embedding its source within the project. 
 2. A number of example projects are provided in the `tests` directory. From within that directory, the command `./build a_test_source.cpp` will genereate an executable named `A_test_source`.
-3. The `build` script in that folder may need to be edited depending on the locations of linked libraries and the compiler of your system. 
+3. The `tests/build` script simply automates a simple command-line compiler instruction. You may need to adjust the compiler flags in that file depending on how you've installed the dependencies above.  
 
 
 ## Description of tests
@@ -24,10 +40,4 @@ a library for audio processing
 13. `spectral.cpp`: demonstrates use of classes for frequency-domain manipulations (via a callback interface, a bit like Max's `pfft~`). This example performs spectral gating, only allowing high-amplitude components through. This tends to remove transients and other wideband sounds. 
 14. `subtractive.cpp`: polyphonic subtractive synthesizer with dynamic tempering. 
 
-
-## Description of scores
-The `scores` folder contains pictures of different portions of the (ongoing) creative process. 
-
-1. `graphic`: an initial formal sketch, tabulation of sounds & techniques. 
-2. # Music-203-F21
-# Music-203-F21
+The additive and subtractive synthesizers expect midi messages from the internal IAC Driver Bus. The script `python/launch.py` is designed to provide an interface for sending such messages, and expects to talk to a Novation Launchpad Pro Mk3 plugged in over USB. If you prefer to use a different device, run the terminal command `python3 mirror.py "your_input_device_name"` to send messages to the bus. 
