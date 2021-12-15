@@ -1,0 +1,181 @@
+\documentclass{amsart}
+
+\renewcommand{\labelenumi}{\bf\alph{enumi}.}
+\renewcommand{\labelenumii}{\bf\alph{enumii}.}
+\renewcommand{\labelenumiii}{\bf\roman{enumiii}.}
+\renewcommand{\thesubsubsection}{\arabic{section}.\arabic{subsection}\,\alph{subsubsection}}
+
+\usepackage{amssymb,amsmath,amsthm,amsfonts,bbm,accents,mathtools,dsfont,color,float}
+\usepackage{enumerate}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{graphicx,booktabs}
+\usepackage{setspace}
+\usepackage{stmaryrd}
+\usepackage{centernot}
+\usepackage{mathdots}
+\usepackage{pgf,tikz}
+\usepackage{mathrsfs}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{positioning}
+\usepackage{amsthm}
+\usepackage{listings}
+\usepackage{textcomp}
+\usepackage{cancel}
+\usepackage{arydshln}
+\usepackage[normalem]{ulem}
+\usepackage{import}
+\usepackage{parskip}
+
+\usepackage{algorithm, algorithmic}
+
+\usepackage{pgfplots} 
+\pgfplotsset{compat=1.17}
+
+\allowdisplaybreaks
+
+\DeclareMathOperator{\vspan}{span}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\img}{im}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator*{\esssup}{ess\,sup}
+\DeclareMathOperator*{\essinf}{ess\,inf}
+\DeclareMathOperator{\supp}{supp}
+\DeclareMathOperator*{\essran}{ess\,ran}
+\DeclareMathOperator{\Id}{Id}
+\DeclareMathOperator{\Col}{Col}
+\DeclareMathOperator{\Null}{Null}
+\DeclareMathOperator{\proj}{proj}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\Mat}{Mat}
+\DeclareMathOperator{\class}{class}
+\DeclareMathOperator{\err}{err}
+\DeclareMathOperator{\argmin}{arg\,min}
+
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+\DeclarePairedDelimiter{\group}{\langle}{\rangle}
+\DeclarePairedDelimiter{\set}{\{}{\}}
+\DeclarePairedDelimiter{\term}{(}{)}
+\DeclarePairedDelimiter{\brak}{[}{]}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+
+\newcommand{\R}{\mathbf{R}}
+\newcommand{\N}{\mathbf{N}}
+\newcommand{\C}{\mathbf{C}}
+\newcommand{\Z}{\mathbf{Z}}
+\newcommand{\Q}{\mathbf{Q}}
+\newcommand{\diff}{\mathrm{d}}
+\newcommand{\E}{\mathbf{E}}
+\newcommand{\T}{\mathbf{T}}
+\newcommand{\Pp}{\mathbf{P}}
+\newcommand{\Hyp}{\mathbf{H}}
+\newcommand{\1}{\mathbf{1}}
+\newcommand{\F}{\mathbf{F}}
+\renewcommand{\le}{\leqslant}
+\renewcommand{\ge}{\geqslant}
+\renewcommand{\v}{\mathbf}
+
+\begingroup
+\makeatletter
+\@for\theoremstyle:=definition,remark,plain\do{%
+\expandafter\g@addto@macro\csname th@\theoremstyle\endcsname{%
+\addtolength\thm@preskip\parskip
+}%
+}
+\endgroup
+
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{innercustomthm}{Theorem}
+\newenvironment{numthm}[1]
+{\renewcommand\theinnercustomthm{#1}\innercustomthm}
+{\endinnercustomthm}
+\newtheorem{innercustomlem}{Lemma}
+\newenvironment{numlem}[1]
+{\renewcommand\theinnercustomlem{#1}\innercustomlem}
+{\endinnercustomlem}
+\newtheorem*{thm*}{Theorem}
+\newtheorem*{lemma}{Lemma}
+\newtheorem{prop}{Proposition}
+\newtheorem{obs}{Observation}
+\newtheorem{rmk}{Remark}
+\newtheorem{cor}{Corollary}
+\newtheorem{question}{Question}
+\newtheorem{defn}{Definition}
+\newtheorem{prob}{Problem}
+\newtheorem{examp}{Example}
+\newtheorem{claim}{Claim}
+
+
+
+\definecolor{deepblue}{rgb}{0,0,0.8}
+\definecolor{deepred}{rgb}{0.6,0,0}
+\definecolor{neonorange}{rgb}{0.949,0.521,0}
+\definecolor{deepgreen}{rgb}{0,0.5,0}
+\definecolor{gray}{rgb}{0.4,0.4,0.4}
+\definecolor{lightgray}{rgb}{0.7,0.7,0.7}
+
+\newcommand\pythonstyle{\lstset{
+language=Python,
+upquote=true,
+basicstyle={\small\ttfamily},
+keywordstyle=\color{deepblue},
+emphstyle=[1]\color{deepred},    % Custom highlighting style
+emphstyle=[2]\color{neonorange},    % Custom highlighting style
+emph=[1]{self, __init__},          % Custom highlighting
+emph=[2]{True, False, None},
+stringstyle=\color{deepgreen},
+numberstyle=\tiny\color{gray},
+commentstyle=\color{gray},
+frame=tb,                         % Any extra options here
+aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=fullflexible,
+  keepspaces=true
+}}
+
+
+\lstnewenvironment{python}[1][] {\pythonstyle\lstset{#1}} {}
+\newcommand\pythonexternal[2][]{{\pythonstyle\lstinputlisting[#1]{#2}}}
+\newcommand\pythoninline[1]{{\pythonstyle\lstinline!#1!}}
+
+\DeclareUnicodeCharacter{2212}{-}
+
+\begin{document}
+\begin{center} {\large \textbf{HUYGENS}\\
+an odd kind of sympathy} \end{center}
+
+Huygens is a library of tools for manipulating and synthesizing sound. It depends on \texttt{PortAudio} to provide access to audio hardware and on \texttt{RtMidi} for processing MIDI messages.
+
+\section*{Class Hierarchy}
+\begin{enumerate}
+  \item \texttt{Wave<T>}: a wavetable. Initialized by passing a lambda of a phase (by default in $[0,1)$). Supports different forms of interpolated lookup. 
+  
+  \item \texttt{Oscillator<T>}: stores a frequency and a phase. The \texttt{tick()} method updates the phase according to the frequency. Also supports phase- and frequency-modulation, with an adjustable stiffness coefficient for smoothing sudden changes in these parameters. 
+  
+  \item \texttt{Synth<T>}: inherits from \texttt{Oscillator<T>}; also stores a pointer to a \texttt{Wave<T>}. A \texttt{Synth<T>} object has an \texttt{operator()} function which returns the wavetable evaluated at the current phase. 
+  
+  \item \texttt{Filter<T>}: initialized with a list of feedback and feedforward coefficients, $\set{a_j}_{j = 0}^N, \set{b_j}_{j = 1}^N$. Given a signal $\set{x_n}_{n \in \Z}$, an object of the \texttt{Filter<T>} class produces the signal $\set{(Tx)_n}_{n \in \Z}$ satisfying the recurrence
+  \[ (Tx)_n = \sum_{j=0}^N a_j x_{n-j} - \sum_{j=1}^N b_j (Tx)_{n-j}. \]
+  Has an \texttt{operator(T sample)} function, which takes a new sample as input and returns a filtered sample. Needs a call to \texttt{tick()} at sample rate. 
+
+  Also supports initialization by a list of poles and zeros. 
+  
+  \item \texttt{Buffer<T>}: circular buffer object; internally, stores an array of some length and an ``origin'' position which is advanced with \texttt{tick()}. Member functions \texttt{write} and \texttt{accum} modify the array at the origin; \texttt{operator(T position)} looks up the contents of the buffer \texttt{position} samples in the past. 
+  
+  \item \texttt{Sinusoids<T>}: a bank of sinusoids in a series over some fundamental, with harmonicity and decay parameters. Supports sample rate modulation of the decay, harmonicity, and fundamental frequency.
+  
+  \item \texttt{Particle}, \texttt{Spring}, \texttt{Gravity}: classes for discrete Newtonian physics, currently in one dimension; a \texttt{Particle} has mass, position and velocity, and may accumulate forces with calls to \texttt{pull(double force)}. Objects of the class are initialized with a drag coefficient (the user supplies a time in seconds for relaxation from velocity $1$). The \texttt{Spring} and \texttt{Gravity} classes couple two particles; in the case of the first, a call to \texttt{tick()} pulls on the particles with a force proportional to their distance; in that of the second, with a force proportional to the product of their masses and inversely proportional to their distance squared. 
+  
+  \item \texttt{Polyphon<T>}: an ensemble of particles whose positions set the frequencies of an additive synthesizer. A ``note'' is a series of particles (whose positions represent pitches, not frequencies), coupled with \texttt{Spring} objects to enforce some harmonicity. Particles from distinct notes are coupled by \texttt{Gravity} objects, so that when polyphony is present, overtones align with one another. Needs a call to \texttt{tick()} to update the phases of its oscillators, and occasional (not necessarly sample-rate) calls to \texttt{physics()} to update the particles. 
+  
+  \item \texttt{Polyres<T>}: identical to \texttt{Polyphon<T>}, except that particle positions are used to set the center frequencies of a bank of resonant biquad filters. 
+  
+  \item \texttt{Granulator<T>}: granular synthesizer. Initialized with a pointer to a \texttt{Wave<T>}, the windowing function, and a pointer to a \texttt{Buffer<T>}, the buffer from which to read grains. The member function \texttt{request} attempts to allocate a new grain with some parameters (delay from current readhead of the buffer, grain length, playback speed, gain). Needs a call to \texttt{tick()} at audiorate. The \texttt{operator()} member function gets the current sample for output. 
+  \end{enumerate} 
+
+\end{document}

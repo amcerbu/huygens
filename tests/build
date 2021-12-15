@@ -1,0 +1,21 @@
+#!/usr/bin/env zsh
+# usage: ./build name.cpp to build one file or ./build to build all
+
+base=${1%.cpp}
+
+if [ -z "$base" ]
+then
+	for i in *.cpp; do
+		[ -f "$i" ] || break
+		base=${i%.cpp}
+		echo -n "building $i ... "
+		outname=${(C)base}
+		g++ -Wall -O2 -std=c++17 $i -o $outname -l fftw3 -l m -l portaudio -l ncurses -l rtmidi -include ../src/tinyosc.cpp
+		echo "wrote ${outname}"
+	done
+else
+	echo -n "building $1 ... "
+	outname=${(C)base}
+	g++ -Wall -O2 -std=c++17 $1 -o $outname -l fftw3 -l m -l portaudio -l ncurses -l rtmidi -include ../src/tinyosc.cpp
+	echo "wrote ${outname}"
+fi
