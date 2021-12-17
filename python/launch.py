@@ -213,7 +213,11 @@ class Keyboard(Application):
 		self.color = 40
 		self.handedness = 'right' # ambidextrous
 
-		self.tune(36, 7) # C1, fourths tuning
+		# some options: 36, 5, 1: bass
+		#  				    7, 1: cello
+		# 					1, 2: harpejji	
+		# 				    4, 3: tonnetz
+		self.tune(36, 5, 1) # C1 in lower-left corner
 		self.sustains = {(x,y) : set() for x in range(size) for y in range(size)}
 		self.sustained = {note : set() for note in self.range}
 
@@ -241,14 +245,15 @@ class Keyboard(Application):
 			self.release(pad)
 			self.unchord(pad, displacement = n if self.walking else 0)
 
-	def tune(self, origin, tuning):
+	def tune(self, origin, tuning, frets = 1):
 		self.origin = origin
 		self.tuning = tuning
-		self.breadth = (size - 1) * tuning + size - 1
+		self.frets = frets
+		self.breadth = (size - 1) * tuning + (size - 1) * frets
 		self.remap()
 
 	def remap(self):
-		self.map = np.array([[self.origin + x + self.tuning * y for y in range(size)] for x in range(size)])
+		self.map = np.array([[self.origin + self.frets * x + self.tuning * y for y in range(size)] for x in range(size)])
 
 		if self.handedness == 'ambi':
 			self.map[:,:size // 2] = self.map[:,:size // 2][::-1]
@@ -268,8 +273,8 @@ class Keyboard(Application):
 		inharm = [bool(self.harmonized[i]) for i in range(self.origin, self.origin + self.breadth + 1)]
 
 		for y in range(size):
-			self.keystate[:,y][inscope[self.tuning * y : self.tuning * y + size]] = self.pressed
-			self.keystate[:,y][inharm[self.tuning * y : self.tuning * y + size]] = self.triggered
+			self.keystate[:,y][inscope[self.tuning * y : self.tuning * y + self.frets * size : self.frets]] = self.pressed
+			self.keystate[:,y][inharm[self.tuning * y : self.tuning * y + self.frets * size : self.frets]] = self.triggered
 			
 			if self.handedness == 'left' or (self.handedness == 'ambi' and y < size // 2):
 				self.keystate[:,y] = self.keystate[:,y][::-1]
@@ -282,8 +287,8 @@ class Keyboard(Application):
 
 			if on and button == 'up': self.transpose(self.tuning)
 			elif on and button == 'down': self.transpose(-self.tuning)
-			elif on and button == 'left': self.transpose(-1)
-			elif on and button == 'right': self.transpose(1)
+			elif on and button == 'left': self.transpose(-self.frets)
+			elif on and button == 'right': self.transpose(self.frets)
 
 			elif on and button in self.bins: # a chord button is pressed
 				track = self.bins[button]

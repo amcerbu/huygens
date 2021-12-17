@@ -17,8 +17,8 @@ void interrupt(int ignore)
 	running = false;
 }
 
-Metro<double> physics(4800); // rate of physics computation
-Additive<double> addi(&cycle, 10, 11, 0.7); // sinusoids, 10 voices, 11 overtones, decay coeff 0.7
+Metro<double> physics(SR); // rate of physics computation
+Additive<double> addi(&cycle, 10, 11, 0.5); // sinusoids, 10 voices, 11 overtones, decay coeff 0.7
 
 inline int process(const float* in, float* out)
 {

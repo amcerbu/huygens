@@ -17,35 +17,40 @@ void interrupt(int ignore)
 	running = false;
 }
 
-Metro<double> physics(2400);
-Subtractive<double> subL(7, 7, 0.7);
-// Subtractive<double> subR(7, 7, 0.7);
-Noise<double> excitationL;
-Noise<double> excitationR;
-double gain = 20;
+Metro<double> physics(SR / 10);
+Subtractive<double> sub(7, 7, 0.7);
+Noise<double> excitation;
+
+double boost = 0;
+double air = 10;
+double gain;
+
+Filter<double> smoother({0.0001},{0,-0.9999});
+
+Filter<double> nyquist({1,0.5}, {0});
 
 inline int process(const float* in, float* out)
 {
 	for (int i = 0; i < BSIZE; i++)
 	{
-		out[2 * i] = out[2 * i + 1] = subL(limiter(gain * excitationL()));
-		// out[2 * i + 1] = subR(excitationR());
+		out[2 * i] = out[2 * i + 1] = nyquist(limiter(sub((air + boost * smoother(gain)) * excitation()))) / 2;
 
 		if (physics())
 		{
-			subL.physics();
-			// subR.physics();
+			sub.physics();
 		}
 
-		subL.tick();
-		// subR.tick();
+		sub.tick();
 		physics.tick();
-		excitationL.tick();
-		// excitationR.tick();
+		excitation.tick();
+		smoother.tick();
+		nyquist.tick();
 	}
 
 	return 0;
 }
+
+unsigned char pressures[128];
 
 void process_midi(MidiIn* device)
 {
@@ -68,19 +73,29 @@ void process_midi(MidiIn* device)
 				velocity = (int)message[2];
 				if (velocity && (Status)message[0] != note_off)
 				{
-					subL.makenote(pitch, dbtoa(-8 * (1 - (double)velocity / 127)));
+					sub.makenote(pitch, dbtoa(-8 * (1 - (double)velocity / 127)));
 				}
 				else
 				{
-					subL.endnote(pitch);
+					sub.endnote(pitch);
+					pressures[pitch] = 0;
 				}
 				break;
 
 			case aftertouch:
 				pitch = (int)message[1];
 				velocity = (int)message[2];
-				weight = (double)velocity / 127.0;
-				// subL.aftertouch(pitch, 0.999 * (weight) + 0.99999 * (1 - weight));
+
+				pressures[pitch] = velocity;
+				weight = 0;
+				for (int i = 0; i < 128; i++)
+				{
+					double w = (double)pressures[i] / 127;
+					weight += w * w;
+				}
+
+				gain = sqrt(weight);
+				// sub.aftertouch(pitch, 0.999 * (weight) + 0.99999 * (1 - weight));
 				break;
 
 			default:
@@ -95,6 +110,8 @@ MidiIn MI = MidiIn();
 
 int main()
 {
+	memset(pressures, 0, 128 * sizeof(unsigned char));
+
 	// bind keyboard interrupt to program exit
 	signal(SIGINT, interrupt);
 
