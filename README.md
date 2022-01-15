@@ -6,11 +6,17 @@ The piece aims to develop a single musical gesture: a gradual accumulation of so
 The form of the piece is arranged into sections of increasing length and timbral density. The smallest formal unit of the piece is 28 beats of 132 bpm. The structure is as follows:
 
 (0:12) A: 1 unit; 1 timbral idea (unison tremollo, ponticello, with accents)
+
 (0:12) B: 1 unit; 1 timbral idea (double-stop tremollo, ponticello, with accents)
+
 (0:25) C: 2 units; 2 timbral ideas (double-stop tremollo with motion of the voices, intermittent ordinario sustained double stops)
+
 (0:38) D: 3 units; 3 timbral ideas (rocking / string-crossing motion across three strings, sustained ordinario harmonics, intermittent spectral freeze of sustained notes)
+
 (1:04) E: 5 units; 
+
 (1:42) F: 8 units;
+
 (2:45) G: 13 units;
 
 (1:00) Coda
