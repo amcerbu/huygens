@@ -18,8 +18,8 @@ using namespace std;
 using namespace soundmath;
 
 #define BSIZE 256
-#define N 512
-#define LAPS 64
+#define N 32768
+#define LAPS 2
 
 static bool running = true;
 void interrupt(int ignore)
@@ -30,25 +30,52 @@ void interrupt(int ignore)
 	running = false;
 }
 
+double transp = 2;
+double phases[N];
+double oldphases[N];
+
+double amps[N];
+double oldamps[N];
+
+const double advance = 2 * PI / LAPS; // expected phase advance for bin-centered sinusoid
+
+/*
+a sinusoid centered on bin j will complete i oscillations per frame; thus we expect it
+to have phase - oldphase = 2 pi j / laps (mod 2 pi). 
+
+
+*/
+
 inline int f_process(const complex<double>* in, complex<double>* out)
 {
-	long double average = 0;
 	for (int i = 0; i < N; i++)
 	{
-		out[i] = 0;
-		average += abs(in[i]);
+		phases[i] = arg(in[i]);
+		amps[i] = abs(in[i]);
 	}
 
-	average /= N;
+	memset(out, 0, sizeof(complex<double>) * N);
 
-	for (int i = 0; i < N; i++)
+	for (int i = 0; i < N / 2; i++)
 	{
-		if (norm(in[i]) < 100 * average * average)
-			out[i] = 0;
+		static double delta = fmod(phases[i] - oldphases[i] + 2 * PI, 2 * PI);
+		static double discrep = delta - i * advance;
+		discrep = fmod(discrep + 3 * PI, 2 * PI) - PI;
 
-		else
-			out[i] = in[i];
+
+
+		int ix = int(i * transp);
+		if (ix < N)
+			out[ix] += in[i];
 	}
+
+	for (int i = N / 2; i < N; i++)
+	{
+		out[i] = out[N - i];
+	}
+
+	memcpy(oldphases, phases, sizeof(double) * N);
+	memcpy(oldamps, amps, sizeof(double) * N);
 
 	return 0;
 }
@@ -70,25 +97,27 @@ inline int process(const float* in, float* out)
 {
 	for (int i = 0; i < BSIZE; i++)
 	{
-		source.write(in[2 * i]);
-		F1.write(granny());
+		// source.write(in[2 * i]);
+		// F1.write(granny());
+
+		F1.write(in[2 * i]);
 
 		static double real, imag;
 		F1.read(&real, &imag);
 		out[2 * i] = out[2 * i + 1] = limiter(real);
 
-		for (int j = 0; j < 4; j++)
-			if (granaries[j].parameters(&offset, &the_size, &speed, &gain, &pan))
-				granny.request(0, the_size / 1000.0, speed, gain, 0);
+		// for (int j = 0; j < 4; j++)
+		// 	if (granaries[j].parameters(&offset, &the_size, &speed, &gain, &pan))
+		// 		granny.request(0, the_size / 1000.0, speed, gain, 0);
 
 		// if (physics())
 		// 	sub.physics();
 
-		delay.tick();
-		source.tick();
-		granny.tick();
-		for (int j = 0; j < 4; j++)
-			granaries[j].tick();
+		// delay.tick();
+		// source.tick();
+		// granny.tick();
+		// for (int j = 0; j < 4; j++)
+		// 	granaries[j].tick();
 		// bandpass.tick();
 		// excitation.tick();
 		// sub.tick();

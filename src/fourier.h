@@ -105,7 +105,7 @@ namespace soundmath
 				{
 					if (writepoints[i] >= 0)
 					{
-						double window = hann(writepoints[i] / (double)N);
+						double window = halfhann(writepoints[i] / (double)N);
 						in[writepoints[i] + N * i].real(window * real);
 						in[writepoints[i] + N * i].imag(window * imag);
 					}
@@ -150,7 +150,7 @@ namespace soundmath
 			{
 				if (reading[i])
 				{
-					double window = hann(readpoints[i] / (double)N);
+					double window = halfhann(readpoints[i] / (double)N);
 					std::complex<double> sample = in[readpoints[i] + N * i];
 					realaccum += window * sample.real();
 					imagaccum += window * sample.imag();

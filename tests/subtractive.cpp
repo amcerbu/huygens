@@ -18,12 +18,14 @@ void interrupt(int ignore)
 }
 
 Metro<double> physics(SR / 10);
+Metro<double> metro(1);
 Subtractive<double> sub(7, 7, 0.7);
 Noise<double> excitation;
 
-double boost = 0;
-double air = 10;
+double boost = 0.5;
+double air = 0.5;
 double gain;
+double the_sample;
 
 Filter<double> smoother({0.0001},{0,-0.9999});
 
@@ -33,7 +35,12 @@ inline int process(const float* in, float* out)
 {
 	for (int i = 0; i < BSIZE; i++)
 	{
-		out[2 * i] = out[2 * i + 1] = nyquist(limiter(sub((air + boost * smoother(gain)) * excitation()))) / 2;
+		// the_sample = sub((air + boost * smoother(gain)) * excitation());
+		// out[2 * i] = out[2 * i + 1] = nyquist(limiter(the_sample)) / 2;
+
+		the_sample = sub(excitation());
+		out[2 * i] = out[2 * i + 1] = air * the_sample + limiter(boost * smoother(gain) * the_sample);
+
 
 		if (physics())
 		{
@@ -45,6 +52,7 @@ inline int process(const float* in, float* out)
 		excitation.tick();
 		smoother.tick();
 		nyquist.tick();
+		metro.tick();
 	}
 
 	return 0;

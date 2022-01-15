@@ -3,6 +3,20 @@ Below are the technical and creative materials behind a composition for viola, c
 
 The piece aims to develop a single musical gesture: a gradual accumulation of sonic energy that "breaks" into a cascade of glassy, smooth sound. I'm drawing on an experience from August 2021, of swimming in the ocean near the Golden Gate Bridge, being picked up and knocked over by waves. 
 
+The form of the piece is arranged into sections of increasing length and timbral density. The smallest formal unit of the piece is 28 beats of 132 bpm. The structure is as follows:
+
+(0:12) A: 1 unit; 1 timbral idea (unison tremollo, ponticello, with accents)
+(0:12) B: 1 unit; 1 timbral idea (double-stop tremollo, ponticello, with accents)
+(0:25) C: 2 units; 2 timbral ideas (double-stop tremollo with motion of the voices, intermittent ordinario sustained double stops)
+(0:38) D: 3 units; 3 timbral ideas (rocking / string-crossing motion across three strings, sustained ordinario harmonics, intermittent spectral freeze of sustained notes)
+(1:04) E: 5 units; 
+(1:42) F: 8 units;
+(2:45) G: 13 units;
+
+(1:00) Coda
+
+Each lettered section negotiates its own increase in energy. 
+
 ## The `scores` folder
 This folder contains pictures of different portions of the (ongoing) creative process. 
 
@@ -35,9 +49,10 @@ Some of the scripts in `python` depend on `mido` and `numpy`, both of which can 
 8. `granny.cpp`: demonstrates both the granular synthesis template, `Granny<T>`, and `UDPReceive`, the system for receiving OSC messages (e.g., from Max). The synthesizer expects to be controlled with `max/gr.maxpat`. It is configured to perform granular synthesis on the incoming audiostream but can be configured to use a different buffer instead.
 9. `metronome.cpp`: a simple metronome utility (type a number in the terminal window to specify bpm). 
 10. `mirror.cpp`: mirrors the incoming audiostream. Also has a small built-in monophonic synthesizer than can be played with the computer keyboard. The buttons of a standard QWERTY keyboard are mapped chromatically in rows, and in ascending fourths from row to row (like a guitar or bass).
-11. `pm.cpp`: demonstrates the phase-modulation capabilities of the `Synth<T>` template. 
-12. `resynthesis.cpp`: demonstrates an ensemble of resonant IIR bandpass filters running in paralellel, using the `Filterbank<T>` template.
-13. `spectral.cpp`: demonstrates use of classes for frequency-domain manipulations (via a callback interface, a bit like Max's `pfft~`). This example performs spectral gating, only allowing high-amplitude components through. This tends to remove transients and other wideband sounds. 
-14. `subtractive.cpp`: polyphonic subtractive synthesizer with dynamic tempering. 
+11. `octave.cpp`: (in progress) a frequency-domain pitch-shifter / octave pedal. 
+12. `pm.cpp`: demonstrates the phase-modulation capabilities of the `Synth<T>` template. 
+13. `resynthesis.cpp`: demonstrates an ensemble of resonant IIR bandpass filters running in paralellel, using the `Filterbank<T>` template.
+14. `spectral.cpp`: demonstrates use of classes for frequency-domain manipulations (via a callback interface, a bit like Max's `pfft~`). This example performs spectral gating, only allowing high-amplitude components through. This tends to remove transients and other wideband sounds. 
+15. `subtractive.cpp`: polyphonic subtractive synthesizer with dynamic tempering. 
 
-The additive and subtractive synthesizers expect midi messages from the internal IAC Driver Bus. The script `python/launch.py` is designed to provide an interface for sending such messages, and expects to talk to a Novation Launchpad Pro Mk3 plugged in over USB. If you prefer to use a different device, run the terminal command `python3 mirror.py "your_input_device_name"` to send messages to the bus. 
+The additive and subtractive synthesizers expect midi messages from the IAC Driver Bus. The script `launch.py` (in the `python` folder) is designed to provide an interface for sending such messages, and expects to talk to a Novation Launchpad Pro Mk3 plugged in over USB. If you prefer to use a different device, run the terminal command `python3 mirror.py "your_input_device_name"` to send your device's midi messages to the driver bus. 

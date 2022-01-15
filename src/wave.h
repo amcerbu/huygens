@@ -129,6 +129,7 @@ namespace soundmath
 	// Wave<double> noise([] (double phase) -> double { return  2 * ((double)rand() / RAND_MAX) - 1; }, Interp::linear);
 	Wave<double> cycle([] (double phase) -> double { return sin(2 * PI * phase); });
 	Wave<double> hann([] (double phase) -> double { return 0.5 * (1 - cos(2 * PI * phase)); });
+	Wave<double> halfhann([] (double phase) -> double { return sqrt(0.5 * (1 - cos(2 * PI * phase))); });
 	Wave<double> limiter([] (double phase) -> double { return 2.0 / PI * atan(phase); }, Interp::linear, -100, 100, false);
 }
 

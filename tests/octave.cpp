@@ -9,15 +9,14 @@
 using namespace std;
 using namespace soundmath;
 
-#define BSIZE 256
-#define N 4096
-// #define N 2048
-// #define N 8192
+#define BSIZE 2048
 // #define N 16384
+// #define N 2048
+// #define N 4096
 // #define N 65536
-// #define N 262144
+#define N 262144
+// #define LAPS 32
 #define LAPS 16
-// #define LAPS 2
 
 static bool running = true;
 void interrupt(int ignore)
@@ -41,7 +40,7 @@ inline int f_process(const complex<double>* in, complex<double>* out)
 
 	for (int i = 0; i < N; i++)
 	{
-		if (norm(in[i]) < N * average * average)
+		if (norm(in[i]) < 10 * average * average)
 		{
 			// out[i] = in[i] / 20.0;
 			out[i] = 0;
@@ -56,8 +55,7 @@ inline int f_process(const complex<double>* in, complex<double>* out)
 	return 0;
 }
 
-// double the_ratio = 0.5;
-double the_ratio = 5;
+double the_ratio = 0.5;
 
 Fourier F1 = Fourier(f_process, N, LAPS);
 Fourier F2 = Fourier(f_process, N, LAPS);
