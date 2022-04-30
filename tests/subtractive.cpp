@@ -8,7 +8,7 @@
 using namespace std;
 using namespace soundmath;
 
-#define BSIZE 16
+#define BSIZE 128
 
 static bool running = true;
 void interrupt(int ignore)
@@ -17,42 +17,33 @@ void interrupt(int ignore)
 	running = false;
 }
 
-Metro<double> physics(SR / 10);
-Metro<double> metro(1);
-Subtractive<double> sub(7, 7, 0.7);
+Metro<double> physics(SR / 32);
+Subtractive<double> sub(7, 7, 0.7, 0.999995, 1, 1);
 Noise<double> excitation;
 
-double boost = 0.5;
+double boost = 1;
+double attenuation = 1;
 double air = 0.5;
 double gain;
 double the_sample;
 
 Filter<double> smoother({0.0001},{0,-0.9999});
-
 Filter<double> nyquist({1,0.5}, {0});
 
 inline int process(const float* in, float* out)
 {
 	for (int i = 0; i < BSIZE; i++)
 	{
-		// the_sample = sub((air + boost * smoother(gain)) * excitation());
-		// out[2 * i] = out[2 * i + 1] = nyquist(limiter(the_sample)) / 2;
-
 		the_sample = sub(excitation());
-		out[2 * i] = out[2 * i + 1] = air * the_sample + limiter(boost * smoother(gain) * the_sample);
-
+		out[i] = the_sample; // limiter(air * the_sample) + attenuation * limiter(boost * smoother(gain) * the_sample);
 
 		if (physics())
-		{
 			sub.physics();
-		}
 
 		sub.tick();
 		physics.tick();
 		excitation.tick();
 		smoother.tick();
-		nyquist.tick();
-		metro.tick();
 	}
 
 	return 0;
@@ -85,7 +76,7 @@ void process_midi(MidiIn* device)
 				}
 				else
 				{
-					sub.endnote(pitch);
+					sub.endnote(pitch); 
 					pressures[pitch] = 0;
 				}
 				break;
@@ -124,11 +115,11 @@ int main()
 	signal(SIGINT, interrupt);
 
 	MI.startup(); // startup midi in
-	MI.ignore(true, true, false); // listen for aftertouch messages
+	MI.ignore(true, true, true); // ignore sysex, time, but not aftertouch
 	MI.getports(false); // get ports but don't print anything
 	MI.open("IAC Driver Bus 1");
 
-	A.startup(1, 2, true); // startup audio engine; 1 input, 2 outputs, console output on
+	A.startup(1, 1, true); // startup audio engine; 1 input, 1 output, console output on
 
 	while (running)
 	{

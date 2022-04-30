@@ -18,14 +18,17 @@ void interrupt(int ignore)
 }
 
 // Metro<double> physics(SR); // rate of physics computation
-Metro<double> physics(0); // rate of physics computation
-Additive<double> addi(&cycle, 10, 11, 0.5); // sinusoids, 10 voices, 11 overtones, decay coeff 0.7
+Metro<double> physics(SR / 4); // rate of physics computation
+// Additive<double> addi(&cycle, 10, 11, 0.5); // sinusoids, 10 voices, 11 overtones, decay coeff 0.7
+Additive<double> addi(&saw, 10, 7, 0.5); // triangle waves, 10 voices, 7 overtones, decay coeff 0.5
+Filter<double> smoother1({1, 4, 6, 4, 1}, {0}); // quadruple zero at Nyquist
+Filter<double> smoother2({1}, {0, -0.9}); // low-pass
 
 inline int process(const float* in, float* out)
 {
 	for (int i = 0; i < BSIZE; i++)
 	{
-		float sample = addi();
+		float sample = smoother2(addi());
 		out[2 * i] = sample;
 		out[2 * i + 1] = sample;
 
@@ -34,6 +37,8 @@ inline int process(const float* in, float* out)
 
 		addi.tick();
 		physics.tick();
+		// smoother1.tick();
+		smoother2.tick();
 	}
 
 	return 0;

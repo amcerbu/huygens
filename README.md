@@ -1,35 +1,5 @@
-# Program notes
-Below are the technical and creative materials behind a composition for viola, cello, and electronics. 
-
-The piece aims to develop a single musical gesture: a gradual accumulation of sonic energy that "breaks" into a cascade of glassy, smooth sound. I'm drawing on an experience from August 2021, of swimming in the ocean near the Golden Gate Bridge, being picked up and knocked over by waves. 
-
-The form of the piece is arranged into sections of increasing length and timbral density. The smallest formal unit of the piece is 28 beats of 132 bpm. The structure is as follows:
-
-(0:12) A: 1 unit; 1 timbral idea (unison tremollo, ponticello, with accents)
-
-(0:12) B: 1 unit; 1 timbral idea (double-stop tremollo, ponticello, with accents)
-
-(0:25) C: 2 units; 2 timbral ideas (double-stop tremollo with motion of the voices, intermittent ordinario sustained double stops)
-
-(0:38) D: 3 units; 3 timbral ideas (rocking / string-crossing motion across three strings, sustained ordinario harmonics, intermittent spectral freeze of sustained notes)
-
-(1:04) E: 5 units; 
-
-(1:42) F: 8 units;
-
-(2:45) G: 13 units;
-
-(1:00) Coda
-
-Each lettered section negotiates its own increase in energy. 
-
-## The `scores` folder
-This folder contains pictures of different portions of the (ongoing) creative process. 
-
-1. `graphic`: an initial formal sketch / graphic score, with tabulation of sounds & techniques I was interested in exploring. 
-2. `experiment`: an experiment using some techniques I was interested in -- harmonics with overpressure, harmonic glissandi.
-3. `sectional draft`: a draft of the opening section of the piece; an expansion of the experiment. 
-4. `revision`: a revised formal sketch. 
+### huygens
+This project is a set of C++ audio manipulation tools; it provides a number of examples of realtime processing and synthesis of audio. It also includes some ready-made "instruments" -- synthesizers that can run out of the box on MIDI input. 
 
 
 ## The `doc`, `max`, `python`, `src`, and `tests` folders
@@ -39,9 +9,9 @@ Some of the scripts in `python` depend on `mido` and `numpy`, both of which can 
 
 
 ## C++ dependencies; compiling and running:
-1. This project depends on `portaudio` (https://github.com/PortAudio/portaudio),  `RtMidi` (https://github.com/thestk/rtmidi), and `fftw3` (https://www.fftw.org/). All can be installed with a package manager such as `homebrew`. The project also depends on `tinyosc` (https://github.com/mhroth/tinyosc), which is used, at the author's suggestion, by embedding its source within the project. 
+1. This project depends on `portaudio` (https://github.com/PortAudio/portaudio),  `RtMidi` (https://github.com/thestk/rtmidi), `fftw3` (https://www.fftw.org/), and `Eigen` (https://eigen.tuxfamily.org/). All can be installed with a package manager such as `homebrew`. The project also depends on `tinyosc` (https://github.com/mhroth/tinyosc), which is used, at the author's suggestion, by embedding its source within the project. 
 2. A number of example projects are provided in the `tests` directory. From within that directory, the command `./build a_test_source.cpp` will genereate an executable named `A_test_source`.
-3. The `tests/build` script simply automates a simple command-line compiler instruction. You may need to adjust the compiler flags in that file depending on how you've installed the dependencies above.  
+3. The `tests/build` script simply automates a simple command-line compiler instruction. You may need to adjust the compiler flags in that file to reflect the paths at which you've installed the dependencies above.  
 
 
 ## Description of tests

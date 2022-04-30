@@ -10,13 +10,13 @@ using namespace std;
 using namespace soundmath;
 
 #define BSIZE 256
-#define N 4096
+// #define N 4096
 // #define N 2048
 // #define N 8192
 // #define N 16384
-// #define N 65536
+#define N 65536
 // #define N 262144
-#define LAPS 16
+#define LAPS 4
 // #define LAPS 2
 
 static bool running = true;
@@ -35,13 +35,14 @@ inline int f_process(const complex<double>* in, complex<double>* out)
 	{
 		out[i] = 0;
 		average += abs(in[i]);
+		// average += norm(in[i]);
 	}
 
 	average /= N;
 
 	for (int i = 0; i < N; i++)
 	{
-		if (norm(in[i]) < N * average * average)
+		if (norm(in[i]) > 100 * average * average)
 		{
 			// out[i] = in[i] / 20.0;
 			out[i] = 0;

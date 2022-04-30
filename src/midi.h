@@ -13,6 +13,11 @@ namespace soundmath
 
 	class MidiIn
 	{
+	public:
+		std::vector<unsigned char> message;
+		int bytes;
+		double stamp;
+
 	private:
 		RtMidiIn *midi = 0;
 		std::vector<std::string> names;
@@ -93,6 +98,12 @@ namespace soundmath
 			return midi->getMessage(message);
 		}
 
+		void get()
+		{
+			stamp = get(&message);
+			bytes = message.size();
+		}
+
 	};
 
 
@@ -166,6 +177,11 @@ namespace soundmath
 				if (names[i] == name)
 					return open(i);
 			return 1;
+		}
+
+		void send(std::vector<unsigned char>* message)
+		{
+			midi->sendMessage(message);
 		}
 	};
 }

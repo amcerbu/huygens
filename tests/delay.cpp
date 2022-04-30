@@ -38,7 +38,7 @@ int main()
 	// bind keyboard interrupt to program exit
 	signal(SIGINT, interrupt);
 
-	delay.coefficients({{0,1}}, {{20000,0.5}, {30000,0.5}});
+	delay.coefficients({{0,1}}, {{20000,0.5}, {10000,0.5}});
 	A.startup(1, 2, true); // startup audio engine; 1 input, 2 outputs, console output on
 
 	while (running)

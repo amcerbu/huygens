@@ -1,7 +1,11 @@
 #!/usr/bin/env zsh
-# usage: ./build name.cpp to build one file or ./build to build all
+# usage: ./build name.cpp to build executable Name, or ./build to build all *.cpp in directory
 
 base=${1%.cpp}
+
+build () {
+	g++ -Wall -O2 -std=c++17 $1 -o $outname -I /usr/local/include/eigen3 -l fftw3 -l m -l portaudio -l ncurses -l rtmidi -include ../src/tinyosc.cpp
+}
 
 if [ -z "$base" ]
 then
@@ -10,12 +14,12 @@ then
 		base=${i%.cpp}
 		echo -n "building $i ... "
 		outname=${(C)base}
-		g++ -Wall -O2 -std=c++17 $i -o $outname -l fftw3 -l m -l portaudio -l ncurses -l rtmidi -include ../src/tinyosc.cpp
+		build $i
 		echo "wrote ${outname}"
 	done
 else
 	echo -n "building $1 ... "
 	outname=${(C)base}
-	g++ -Wall -O2 -std=c++17 $1 -o $outname -l fftw3 -l m -l portaudio -l ncurses -l rtmidi -include ../src/tinyosc.cpp
+	build $1
 	echo "wrote ${outname}"
 fi

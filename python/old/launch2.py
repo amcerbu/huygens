@@ -10,9 +10,6 @@ size = 8
 n = 12
 aftertouch = False
 
-def mtof(midi):
-	return 440 * 2 ** ((midi - 69.0) / n)
-
 # methods for interacting with control surface
 class Launchpad:
 	static = True
@@ -171,8 +168,9 @@ class Application:
 
 		self.piano = np.array([-1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0]) # C : -1, white : 0, black : 1
 		
-		# [neutral, pressed, triggered, sympathized, sympathizing] x [white, black, C]
-		self.keycolor = np.array([[119, 0, 96], [40, 41, 10], [88, 101, 88], [104, 112, 92], [6, 7, 5]], dtype = 'byte')
+		# [neutral, pressed, triggered, sympathized] x [white, black, C]
+		# self.keycolor = np.array([[119, 0, 96], [40, 41, 60], [88, 101, 54]], dtype = 'byte') # color scheme
+		self.keycolor = np.array([[119, 0, 96], [40, 41, 40], [88, 101, 88], [80, 81, 82]], dtype = 'byte') # color scheme
 
 		self.bins = {name : i for i, name in enumerate( \
 			['track_1', 'track_2', 'track_3', 'track_4', 'track_5', 'track_6', 'track_7', 'track_8', \
@@ -182,7 +180,6 @@ class Application:
 		self.pressed = 1
 		self.triggered = 2
 		self.sympathized = 3
-		self.sympathizes = 4
 
 		self.range = range(21, 109) # piano range: A0 to C8
 
@@ -226,9 +223,9 @@ class Keyboard(Application):
 		self.harmonizes = {(x,y) : set() for x in range(size) for y in range(size)} # same as above, but for chords
 		self.harmonized = {note : set() for note in self.range}
 
-		self.resonates = {note : set() for note in self.range}
-		self.resonated = {note : set() for note in self.range}
-		self.resonance = None
+		# slightly different than above!
+		self.resonates = {note : set() for note in self.range} # what notes are resonated by note
+		self.resonated = {note : set() for note in self.range} # what notes resonate note
 
 		self.footlatch = False
 		self.buttonlatch = False
@@ -242,6 +239,9 @@ class Keyboard(Application):
 
 		self.harmonizer = None
 		self.harmony = None
+
+		self.resonator = None
+		self.resonance = None
 		
 		self.rootless = False
 		self.walking = False # chord buttons rather than pads trigger harmony (raised an octave if true)
@@ -256,10 +256,10 @@ class Keyboard(Application):
 			self.release(pad)
 			self.unchord(pad, displacement = n if self.walking else 0)
 
-	def tune(self, origin, tuning, frets):
-		self.origin = origin # pitch of lower-left corner
-		self.tuning = tuning # column interval
-		self.frets = frets # row interval
+	def tune(self, origin, tuning, frets = 1):
+		self.origin = origin
+		self.tuning = tuning
+		self.frets = frets
 		self.breadth = (size - 1) * tuning + (size - 1) * frets
 		self.remap()
 
@@ -280,26 +280,22 @@ class Keyboard(Application):
 
 	def print(self):
 		self.keystate = np.zeros((size, size), dtype = 'byte')
-		indices = self.origin, self.origin + self.breadth + 1
-		inscope = [bool(self.sustained[i]) for i in range(*indices)]
-		inharm = [bool(self.harmonized[i]) for i in range(*indices)]
-		inreson = [bool(self.resonated[i]) for i in range(*indices)]
-		insymp = [bool(self.resonates[i]) for i in range(*indices)]
+		inscope = [bool(self.sustained[i]) for i in range(self.origin, self.origin + self.breadth + 1)]
+		inharm = [bool(self.harmonized[i]) for i in range(self.origin, self.origin + self.breadth + 1)]
+		inreson = [bool(self.resonated[i]) for i in range(self.origin, self.origin + self.breadth + 1)]
 
 		for y in range(size):
 			self.keystate[:,y][inscope[self.tuning * y : self.tuning * y + self.frets * size : self.frets]] = self.pressed
 			self.keystate[:,y][inharm[self.tuning * y : self.tuning * y + self.frets * size : self.frets]] = self.triggered
 			self.keystate[:,y][inreson[self.tuning * y : self.tuning * y + self.frets * size : self.frets]] = self.sympathized
-			self.keystate[:,y][insymp[self.tuning * y : self.tuning * y + self.frets * size : self.frets]] = self.sympathizes
 			
 			if self.handedness == 'left' or (self.handedness == 'ambi' and y < size // 2):
 				self.keystate[:,y] = self.keystate[:,y][::-1]
 
 		self.display = self.keycolor[self.keystate, self.piano[self.map % n]]
 
-
 	def process(self, command):
-		if len(command) == 2: # cc button
+		if len(command) == 2:
 			button, on = command
 
 			if button == 'sustain': # received sustain pedal cc message
@@ -310,39 +306,32 @@ class Keyboard(Application):
 
 			elif on and button == 'play':
 				self.sustaintoggle = not self.sustaintoggle # pressing the play button switches this mode on and off
+				self.owner.button('play', 1 if self.sustaintoggle else 0) # illuminate the button correspondingly
 
-				if self.sustaintoggle: # just turned on
-					self.owner.button('play', 1) # illuminate the button
-				else: # just turned off
-					self.owner.button('play', 0) # unlight the button
-					
-					for note in (root for root in self.resonates if self.resonates[root]):
-						self.unresonate(note)
-
-					self.resonates = {note : set() for note in self.range} # remove all resonance
-					self.resonated = {note : set() for note in self.range}
-					
-					self.harmonizer = None
-					self.harmony = None
-					for trigger in self.bins: # dim all appropriate buttons
-						self.owner.button(trigger, 7 if self.owner.saves[self.bins[trigger]] else 0)
+				for trigger in self.bins: # adjust color of all chord trigger buttons
+					track = self.bins[trigger]
+					self.owner.button(trigger, (55 if self.sustaintoggle else 7) if self.owner.saves[track] else 0)
 
 			if button in ['sustain', 'record', 'play']:
-				self.pedal = self.footlatch or self.buttonlatch or self.sustaintoggle # any one of these is sufficient
+				self.pedal = self.footlatch or self.buttonlatch or self.sustaintoggle
+
+				if not self.sustaintoggle:
+						self.resonates = {note : set() for note in self.range}
+						self.resonated = {note : set() for note in self.range}
 
 				if self.pedal:
 					self.owner.button('record', 1)
 					for pad in (coordinate for coordinate in self.sustains if coordinate and self.sustains[coordinate]):
-						for note in self.sustains[pad]: # any notes held by any pads are also held by pedal
+						for note in self.sustains[pad]:
 							self.sustains[()].add(note)
 							self.sustained[note].add(())
 
 					for pad in (coordinate for coordinate in self.harmonizes if self.harmonizes[coordinate]):
-						for note in self.harmonizes[pad]: # any notes harmonized by any pads are also held by pedal
+						for note in self.harmonizes[pad]:
 							self.sustains[()].add(note)
 							self.sustained[note].add(())
 
-					for note in self.resonates: # any note resonated by any note gets held by pedal
+					for note in self.resonates:
 						for pitch in self.resonates[note]:
 							self.sustains[()].add(pitch)
 							self.sustained[pitch].add(())
@@ -354,7 +343,7 @@ class Keyboard(Application):
 				if on:
 					self.owner.button('duplicate', 1) # light up the duplicate button
 					for note in self.sustained:
-						if self.sustained[note] or self.harmonized[note] or self.resonated[note]:
+						if self.sustained[note]:
 							self.owner.play(note, 64)
 				else:
 					self.owner.button('duplicate', 0) # turn off the duplicate button
@@ -366,27 +355,37 @@ class Keyboard(Application):
 
 			elif on and button in self.bins: # a chord button is pressed
 				track = self.bins[button]
-				old = self.harmonizer
 
-				idle = old != track and self.owner.saves[track]
-				self.harmonizer = track if idle else None
-				self.harmony = self.owner.saves[track] if idle else None
+				if self.sustaintoggle:
+					idle = (self.resonator is None or self.resonator != track) and self.owner.saves[track]
+					self.resonator = track if idle else None
+					self.resonance = self.owner.saves[track] if idle else None # subset of {0,...,12}
+					
+					for trigger in self.bins: # dim all chord trigger buttons
+						self.owner.button(trigger, 55 if self.owner.saves[self.bins[trigger]] else 0)
+					
+					if self.owner.saves[track]: # if appropriate, illuminate button
+						self.owner.button(button, 53 if idle else 55) # light the button up purple
 
-				for trigger in self.bins: # dim all appropriate buttons
-					self.owner.button(trigger, 7 if self.owner.saves[self.bins[trigger]] else 0)
+				else:
+					self.harmonizer = track
+					self.harmony = self.owner.saves[track]
 
-				if self.harmony:
-					self.owner.button(button, 5) # if appropriate, light up button
-
-				if not self.sustaintoggle and self.harmony and self.walking:
-					for pad in (coordinate for coordinate in self.sustains if coordinate and self.sustains[coordinate]):
-						self.voicelead(pad)
-						self.playchord(pad, 32, displacement = n)
+					if self.harmony:
+						self.owner.button(button, 5) # light the button up red
+					
+					if self.harmony and self.walking:
+						for pad in (coordinate for coordinate in self.sustains if self.sustains[coordinate]):
+							self.voicelead(pad)
+							self.playchord(pad, 32, displacement = n)
 
 			elif not on and button in self.bins: # a chord button is released
 				track = self.bins[button]
 
-				if not self.sustaintoggle:
+				if self.sustaintoggle:
+					pass
+					# self.owner.button(button, 55 if self.owner.saves[track] else 0) # light the button up purple
+				else:
 					self.owner.button(button, 7 if self.owner.saves[track] else 0)
 
 					if self.walking:
@@ -406,45 +405,36 @@ class Keyboard(Application):
 
 				if self.pedal:
 					if self.sustaintoggle:
-						ringing = self.resonates[self.map[pad]] # things the pressed note button resonates
-						if not ringing or self.harmonizer != self.resonance: # either no ringing or new chord button
-							if not (self.harmonizer is None): # if a chord button
-								roots = [root for root in self.resonates if self.resonates[root] and root != self.map[pad]]
+						self.sustains[()] ^= {self.map[pad]}
+						self.sustained[self.map[pad]] ^= {()}
 
-								pitches = self.sympathize(self.map[pad])
-								self.unresonate(self.map[pad], ringing - pitches)
-								self.resonate(self.map[pad], pitches, 32)
-								self.resonance = self.harmonizer
+						direction = self.map[pad] in self.sustains[()] # True if pad is turning on
 
-								if self.mono:
-									for root in roots:
-										self.unresonate(root)
+						if direction:
+							if not (self.resonator is None): # pad needs to be resonated
+								self.resonate(self.map[pad], velocity = 32)
 
-							else:
-								if self.resonated[self.map[pad]]:
-									for note in self.resonated[self.map[pad]]: # for note holding down this note
-										self.resonates[note] -= {self.map[pad]}
-									self.resonated[self.map[pad]] = set()
-									self.sustains[()] -= {self.map[pad]}
-									self.sustained[self.map[pad]] -= {()}
+						self.resonator = None
+						self.resonance = None
+						for trigger in self.bins: # dim all chord trigger buttons
+							self.owner.button(trigger, 55 if self.owner.saves[self.bins[trigger]] else 0)
 
-								else:
-									self.sustains[()] ^= {self.map[pad]}
-									self.sustained[self.map[pad]] ^= {()}
-						
-						else:
+						if not direction and self.resonates[self.map[pad]]: # pad is toggling off and resonates
 							self.unresonate(self.map[pad])
-							self.sustains[()] -= {self.map[pad]}
-							self.sustained[self.map[pad]] -= {()}
+
 
 					else:
 						self.sustains[()].add(self.map[pad])
 						self.sustained[self.map[pad]].add(())
-			
+				
 				if not (self.harmony and self.rootless):
 					self.owner.play(self.map[pad], velocity)
 
-				if not self.sustaintoggle and self.harmony and not self.walking:
+				# if self.sustaintoggle:
+				# 	if not (self.resonator is None):
+				# 		self.resonate(pad, velocity = 32)
+
+				if self.harmony and not self.walking:
 					self.voicelead(pad)	
 					if self.mono:
 						for old in (old for old in self.harmonizes if self.harmonizes[old]):
@@ -512,31 +502,26 @@ class Keyboard(Application):
 		for pitch in chord:
 			self.owner.play(pitch, velocity)
 
-	def sympathize(self, note):
-		pitches = {}
-		roots = self.owner.roots[self.harmonizer]
+	def resonate(self, note, velocity):
+		roots = self.owner.roots[self.resonator]
 		if len(roots) == 1:
 			root = list(roots)[0]
-			structure = sorted([(pitch - root) % n for pitch in self.harmony])
+			structure = set((pitch - root) % n for pitch in self.resonance)
 			octaves = (self.range[-1] - note) // n + 1
-			pitches = [note + p + i * n for p in structure for i in range(octaves)]
-			pitches = [p for p in pitches if p in self.range]
-			# frequencies = [mtof(p) for p in pitches]
+			pitches = set(note + p + i * n for p in structure for i in range(octaves)).intersection(self.range)
+			pitches -= {note}
 
-		return set(pitches)
+			self.resonates[note].update(pitches)
+			for pitch in pitches:
+				self.sustains[()] -= {pitch}
+				self.sustained[pitch] -= {()}
+				self.resonated[pitch].add(note)
 
-	def resonate(self, note, pitches, velocity):
-		self.resonates[note].update(pitches)
-		for pitch in pitches:
-			self.sustains[()] -= {pitch}
-			self.sustained[pitch] -= {()}
-			self.resonated[pitch].add(note)
+			for pitch in pitches:
+				self.owner.play(pitch, velocity)
 
-			self.owner.play(pitch, velocity)
-
-	def unresonate(self, note, subset = None):
-		subset = self.resonates[note] if subset is None else subset
-		for pitch in subset: # subset describes the pitches to free
+	def unresonate(self, note):
+		for pitch in self.resonates[note]:
 			self.resonated[pitch] -= {note}
 			if not len(self.sustained[pitch] | self.harmonized[pitch] | self.resonated[pitch]):
 				self.owner.play(pitch, 0)

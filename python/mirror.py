@@ -21,6 +21,7 @@ with mido.open_input(surface) as ioport, \
 	 mido.open_output(synth) as output:
 	try:
 		for message in ioport:
+			print(message)
 			output.send(message)
 
 	except KeyboardInterrupt:

@@ -5,13 +5,11 @@ from time import sleep
 import numpy as np
 import harmony
 from random import random
+import pickle
 
 size = 8
 n = 12
 aftertouch = False
-
-def mtof(midi):
-	return 440 * 2 ** ((midi - 69.0) / n)
 
 # methods for interacting with control surface
 class Launchpad:
@@ -36,7 +34,7 @@ class Launchpad:
 		bottom[0] = range(1, 9)
 		bottom[1] = range(101, 109)
 
-		control = [*bottom[0], *bottom[1], *top, *left, *right]
+		control = list(bottom[0]) + list(bottom[1]) + list(top) + list(left) + list(right)
 		
 		names = ['arm', 'mute', 'solo', 'volume', 'pan', 'sends', 'device', 'stop_clip', \
 				 'track_1', 'track_2', 'track_3', 'track_4', 'track_5', 'track_6', 'track_7', 'track_8', \
@@ -62,9 +60,13 @@ class Launchpad:
 		self.outputs = outputs
 		self.reset()
 
-	def reset(self):
+	def reset(self, to_output = False):
 		for note in range(2 ** 7):
 			self.ioport.send(mido.Message('note_off', note = note, velocity = 0))
+
+			if to_output:
+				for output in self.outputs:
+					output.send(mido.Message('note_off', note = note, velocity = 0))
 
 	def read(self, message):
 		if message.is_cc():
@@ -165,14 +167,12 @@ class Application:
 	def __init__(self, owner):
 		self.owner = owner
 
-		self.display = np.zeros((size, size), dtype = 'byte') # stores state of 8 x 8 grid
-		self.button = None # the button that opens the application
-		self.color = None # the color of the appication "icon"
+		self.display = np.zeros((size, size), dtype = 'byte')
+		self.button = None
+		self.color = None
 
-		self.piano = np.array([-1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0]) # C : -1, white : 0, black : 1
-		
-		# [neutral, pressed, triggered, sympathized, sympathizing] x [white, black, C]
-		self.keycolor = np.array([[119, 0, 96], [40, 41, 10], [88, 101, 88], [104, 112, 92], [6, 7, 5]], dtype = 'byte')
+		self.piano = np.array([-1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0])
+		self.keycolor = np.array([[119, 0, 96], [40, 41, 60], [88, 101, 54]], dtype = 'byte')
 
 		self.bins = {name : i for i, name in enumerate( \
 			['track_1', 'track_2', 'track_3', 'track_4', 'track_5', 'track_6', 'track_7', 'track_8', \
@@ -181,10 +181,8 @@ class Application:
 		self.neutral = 0
 		self.pressed = 1
 		self.triggered = 2
-		self.sympathized = 3
-		self.sympathizes = 4
 
-		self.range = range(21, 109) # piano range: A0 to C8
+		self.range = range(21, 109)
 
 	def process(self, command):
 		pass
@@ -193,13 +191,11 @@ class Application:
 		pass
 
 	def suspend(self):
-		if self.button:
-			self.owner.button(self.button, 0)
+		self.owner.button(self.button, 0)
 
 	def startup(self):
-		if self.button:
-			self.owner.button(self.button, self.color)
-			self.print()
+		self.owner.button(self.button, self.color)
+		self.print()
 
 	def print(self):
 		pass
@@ -211,30 +207,25 @@ class Keyboard(Application):
 
 		self.button = 'note'
 		self.color = 40
-		self.handedness = 'right' # 'right', 'left', 'ambi'
+		self.handedness = 'right' # ambidextrous
 
 		# some options: 36, 5, 1: bass
 		#  				    7, 1: cello
 		# 					1, 2: harpejji	
 		# 				    4, 3: tonnetz
-		self.tune(36, 5, 1) # C1 in lower-left corner, fours in columns, semitones in rows
-		
-		self.sustains = {(x,y) : set() for x in range(size) for y in range(size)} # sustains[(x,y)] = {notes held by pad (x,y)}
-		self.sustains[()] = set() # () is the damper pedal "pad" coordinates
-		self.sustained = {note : set() for note in self.range} # sustained[note] = {pads (x,y) that hold down note}
-
-		self.harmonizes = {(x,y) : set() for x in range(size) for y in range(size)} # same as above, but for chords
-		self.harmonized = {note : set() for note in self.range}
-
-		self.resonates = {note : set() for note in self.range}
-		self.resonated = {note : set() for note in self.range}
-		self.resonance = None
+		self.tune(36, 5, 1) # C1 in lower-left corner
+		self.sustains = {(x,y) : set() for x in range(size) for y in range(size)}
+		self.sustains[()] = set()
+		self.sustained = {note : set() for note in self.range}
 
 		self.footlatch = False
 		self.buttonlatch = False
 		self.pedal = False # sustain pedal
-		self.sustaintoggle = False # button-toggle for sustain
-		
+		self.pedaltoggle = False # button-toggle for sustain
+
+		self.harmonizes = {(x,y) : set() for x in range(size) for y in range(size)}
+		self.harmonized = {note : set() for note in self.range}
+
 		self.history = []
 		self.historical = True
 		self.window = 1
@@ -245,21 +236,21 @@ class Keyboard(Application):
 		
 		self.rootless = False
 		self.walking = False # chord buttons rather than pads trigger harmony (raised an octave if true)
-		self.chorale = True # chord qualities are determined procedurally unless other structure is imposed
-		self.mono = True # one chord at a time
+		self.chorale = True # chord qualities are determined procedurally unless otherwise structure is imposed
+		self.mono = True
 		self.toggle = False
 
 	def suspend(self):
 		super().suspend()
 
-		for pad in (coordinate for coordinate in self.sustains if coordinate and self.sustains[coordinate]):
+		for pad in (coordinate for coordinate in self.sustains if self.sustains[coordinate]):
 			self.release(pad)
 			self.unchord(pad, displacement = n if self.walking else 0)
 
-	def tune(self, origin, tuning, frets):
-		self.origin = origin # pitch of lower-left corner
-		self.tuning = tuning # column interval
-		self.frets = frets # row interval
+	def tune(self, origin, tuning, frets = 1):
+		self.origin = origin
+		self.tuning = tuning
+		self.frets = frets
 		self.breadth = (size - 1) * tuning + (size - 1) * frets
 		self.remap()
 
@@ -280,84 +271,59 @@ class Keyboard(Application):
 
 	def print(self):
 		self.keystate = np.zeros((size, size), dtype = 'byte')
-		indices = self.origin, self.origin + self.breadth + 1
-		inscope = [bool(self.sustained[i]) for i in range(*indices)]
-		inharm = [bool(self.harmonized[i]) for i in range(*indices)]
-		inreson = [bool(self.resonated[i]) for i in range(*indices)]
-		insymp = [bool(self.resonates[i]) for i in range(*indices)]
+		inscope = [bool(self.sustained[i]) for i in range(self.origin, self.origin + self.breadth + 1)]
+		inharm = [bool(self.harmonized[i]) for i in range(self.origin, self.origin + self.breadth + 1)]
 
 		for y in range(size):
 			self.keystate[:,y][inscope[self.tuning * y : self.tuning * y + self.frets * size : self.frets]] = self.pressed
 			self.keystate[:,y][inharm[self.tuning * y : self.tuning * y + self.frets * size : self.frets]] = self.triggered
-			self.keystate[:,y][inreson[self.tuning * y : self.tuning * y + self.frets * size : self.frets]] = self.sympathized
-			self.keystate[:,y][insymp[self.tuning * y : self.tuning * y + self.frets * size : self.frets]] = self.sympathizes
 			
 			if self.handedness == 'left' or (self.handedness == 'ambi' and y < size // 2):
 				self.keystate[:,y] = self.keystate[:,y][::-1]
 
 		self.display = self.keycolor[self.keystate, self.piano[self.map % n]]
 
-
 	def process(self, command):
-		if len(command) == 2: # cc button
+		if len(command) == 2:
 			button, on = command
 
-			if button == 'sustain': # received sustain pedal cc message
+			if on and button == 'play':
+				self.pedaltoggle = not self.pedaltoggle
+				self.owner.button('play', int(self.pedaltoggle))
+
+			elif button == 'sustain':
 				self.footlatch = on
 
-			elif button == 'record': # button for sustain pedal function
+			elif button == 'record':
 				self.buttonlatch = on
 
-			elif on and button == 'play':
-				self.sustaintoggle = not self.sustaintoggle # pressing the play button switches this mode on and off
-
-				if self.sustaintoggle: # just turned on
-					self.owner.button('play', 1) # illuminate the button
-				else: # just turned off
-					self.owner.button('play', 0) # unlight the button
-					
-					for note in (root for root in self.resonates if self.resonates[root]):
-						self.unresonate(note)
-
-					self.resonates = {note : set() for note in self.range} # remove all resonance
-					self.resonated = {note : set() for note in self.range}
-					
-					self.harmonizer = None
-					self.harmony = None
-					for trigger in self.bins: # dim all appropriate buttons
-						self.owner.button(trigger, 7 if self.owner.saves[self.bins[trigger]] else 0)
-
-			if button in ['sustain', 'record', 'play']:
-				self.pedal = self.footlatch or self.buttonlatch or self.sustaintoggle # any one of these is sufficient
+			if button == 'sustain' or button == 'record' or button == 'play':
+				self.pedal = self.footlatch or self.buttonlatch or self.pedaltoggle
 
 				if self.pedal:
 					self.owner.button('record', 1)
 					for pad in (coordinate for coordinate in self.sustains if coordinate and self.sustains[coordinate]):
-						for note in self.sustains[pad]: # any notes held by any pads are also held by pedal
+						for note in self.sustains[pad]:
 							self.sustains[()].add(note)
 							self.sustained[note].add(())
 
 					for pad in (coordinate for coordinate in self.harmonizes if self.harmonizes[coordinate]):
-						for note in self.harmonizes[pad]: # any notes harmonized by any pads are also held by pedal
+						for note in self.harmonizes[pad]:
 							self.sustains[()].add(note)
 							self.sustained[note].add(())
-
-					for note in self.resonates: # any note resonated by any note gets held by pedal
-						for pitch in self.resonates[note]:
-							self.sustains[()].add(pitch)
-							self.sustained[pitch].add(())
 				else:
 					self.release(())
 					self.owner.button('record', 0)
 
-			elif button == 'duplicate': # retrigger all active midi notes
+			elif button == 'duplicate':
 				if on:
-					self.owner.button('duplicate', 1) # light up the duplicate button
+					self.owner.button('duplicate', 1)
 					for note in self.sustained:
-						if self.sustained[note] or self.harmonized[note] or self.resonated[note]:
+						if self.sustained[note]:
+							# self.owner.play(self.map[pad], 0)
 							self.owner.play(note, 64)
 				else:
-					self.owner.button('duplicate', 0) # turn off the duplicate button
+					self.owner.button('duplicate', 0)
 
 			elif on and button == 'up': self.transpose(self.tuning)
 			elif on and button == 'down': self.transpose(-self.tuning)
@@ -366,85 +332,48 @@ class Keyboard(Application):
 
 			elif on and button in self.bins: # a chord button is pressed
 				track = self.bins[button]
-				old = self.harmonizer
+				self.owner.button(button, 5) # light the button up red
 
-				idle = old != track and self.owner.saves[track]
-				self.harmonizer = track if idle else None
-				self.harmony = self.owner.saves[track] if idle else None
+				self.harmonizer = track
+				self.harmony = self.owner.saves[track]
 
-				for trigger in self.bins: # dim all appropriate buttons
-					self.owner.button(trigger, 7 if self.owner.saves[self.bins[trigger]] else 0)
-
-				if self.harmony:
-					self.owner.button(button, 5) # if appropriate, light up button
-
-				if not self.sustaintoggle and self.harmony and self.walking:
-					for pad in (coordinate for coordinate in self.sustains if coordinate and self.sustains[coordinate]):
+				if self.harmony and self.walking:
+					for pad in (coordinate for coordinate in self.sustains if self.sustains[coordinate]):
 						self.voicelead(pad)
 						self.playchord(pad, 32, displacement = n)
 
 			elif not on and button in self.bins: # a chord button is released
 				track = self.bins[button]
+				self.owner.button(button, 7 if self.owner.saves[track] else 0)
 
-				if not self.sustaintoggle:
-					self.owner.button(button, 7 if self.owner.saves[track] else 0)
+				if self.walking:
+					for pad in (coordinate for coordinate in self.sustains if self.sustains[coordinate]):
+						self.unchord(pad, displacement = n)
+				
+				if self.harmonizer == track: # no more chord buttons held down
+					self.harmonizer = None
+					self.harmony = None
 
-					if self.walking:
-						for pad in (coordinate for coordinate in self.sustains if self.sustains[coordinate]):
-							self.unchord(pad, displacement = n)
-					
-					if self.harmonizer == track: # no more chord buttons held down
-						self.harmonizer = None
-						self.harmony = None
-
-		elif len(command) == 3: # one of the 8 x 8 pressure-sensitive pads
+		elif len(command) == 3:
 			pad, on, velocity = command
 
-			if on: # button pressed
+			if on:
 				self.sustains[pad].add(self.map[pad]) # this pad sustains the pitch self.map[pad]
 				self.sustained[self.map[pad]].add(pad) # the pitch self.map[pad] is sustained by pad
 
 				if self.pedal:
-					if self.sustaintoggle:
-						ringing = self.resonates[self.map[pad]] # things the pressed note button resonates
-						if not ringing or self.harmonizer != self.resonance: # either no ringing or new chord button
-							if not (self.harmonizer is None): # if a chord button
-								roots = [root for root in self.resonates if self.resonates[root] and root != self.map[pad]]
-
-								pitches = self.sympathize(self.map[pad])
-								self.unresonate(self.map[pad], ringing - pitches)
-								self.resonate(self.map[pad], pitches, 32)
-								self.resonance = self.harmonizer
-
-								if self.mono:
-									for root in roots:
-										self.unresonate(root)
-
-							else:
-								if self.resonated[self.map[pad]]:
-									for note in self.resonated[self.map[pad]]: # for note holding down this note
-										self.resonates[note] -= {self.map[pad]}
-									self.resonated[self.map[pad]] = set()
-									self.sustains[()] -= {self.map[pad]}
-									self.sustained[self.map[pad]] -= {()}
-
-								else:
-									self.sustains[()] ^= {self.map[pad]}
-									self.sustained[self.map[pad]] ^= {()}
-						
-						else:
-							self.unresonate(self.map[pad])
-							self.sustains[()] -= {self.map[pad]}
-							self.sustained[self.map[pad]] -= {()}
-
+					if self.pedaltoggle:
+						self.sustains[()] ^= {self.map[pad]}
+						self.sustained[self.map[pad]] ^= {()}
 					else:
 						self.sustains[()].add(self.map[pad])
 						self.sustained[self.map[pad]].add(())
-			
+				
 				if not (self.harmony and self.rootless):
+					# self.owner.play(self.map[pad], 0)
 					self.owner.play(self.map[pad], velocity)
 
-				if not self.sustaintoggle and self.harmony and not self.walking:
+				if self.harmony and not self.walking:
 					self.voicelead(pad)	
 					if self.mono:
 						for old in (old for old in self.harmonizes if self.harmonizes[old]):
@@ -454,7 +383,7 @@ class Keyboard(Application):
 					else:
 						self.playchord(pad, velocity = 32)
 
-			else: # button released
+			else:
 				if self.sustains[pad]:
 					self.release(pad)
 					self.unchord(pad, displacement = n if self.walking else 0)
@@ -469,7 +398,7 @@ class Keyboard(Application):
 	def voicelead(self, pad):
 		roots = self.owner.roots[self.harmonizer]
 		roots = roots if roots else self.harmony
-		condensed = {note % n for chord in self.history for note in chord}
+		condensed = {note % 12 for chord in self.history for note in chord}
 
 		structures = []
 		for root in roots:
@@ -487,8 +416,7 @@ class Keyboard(Application):
 		last = None
 		if self.history:
 			last = self.history[-1]
-			best = min(options, key = lambda x : self.distance(last, x) + \
-												 self.historical * len(condensed ^ set(p % n for p in x)) ** 2)
+			best = min(options, key = lambda x : self.distance(last, x) + self.historical * len(condensed ^ set(p % 12 for p in x)) ** 2)
 		else:
 			best = options[int(random() * len(options))]
 
@@ -512,41 +440,10 @@ class Keyboard(Application):
 		for pitch in chord:
 			self.owner.play(pitch, velocity)
 
-	def sympathize(self, note):
-		pitches = {}
-		roots = self.owner.roots[self.harmonizer]
-		if len(roots) == 1:
-			root = list(roots)[0]
-			structure = sorted([(pitch - root) % n for pitch in self.harmony])
-			octaves = (self.range[-1] - note) // n + 1
-			pitches = [note + p + i * n for p in structure for i in range(octaves)]
-			pitches = [p for p in pitches if p in self.range]
-			# frequencies = [mtof(p) for p in pitches]
-
-		return set(pitches)
-
-	def resonate(self, note, pitches, velocity):
-		self.resonates[note].update(pitches)
-		for pitch in pitches:
-			self.sustains[()] -= {pitch}
-			self.sustained[pitch] -= {()}
-			self.resonated[pitch].add(note)
-
-			self.owner.play(pitch, velocity)
-
-	def unresonate(self, note, subset = None):
-		subset = self.resonates[note] if subset is None else subset
-		for pitch in subset: # subset describes the pitches to free
-			self.resonated[pitch] -= {note}
-			if not len(self.sustained[pitch] | self.harmonized[pitch] | self.resonated[pitch]):
-				self.owner.play(pitch, 0)
-
-		self.resonates[note] = set()
-
 	def release(self, pad):
 		for note in self.sustains[pad]:
 			self.sustained[note] -= {pad}
-			if not len(self.sustained[note] | self.harmonized[note] | self.resonated[note]):
+			if not len(self.sustained[note] | self.harmonized[note]):
 				self.owner.play(note, 0)
 
 		self.sustains[pad] = set()
@@ -554,7 +451,7 @@ class Keyboard(Application):
 	def unchord(self, pad, displacement = 0):
 		for note in self.harmonizes[pad]:
 			self.harmonized[note] -= {pad}
-			if not len(self.sustained[note] | self.harmonized[note] | self.resonated[note]):
+			if not len(self.sustained[note] | self.harmonized[note]):
 				self.owner.play(note, 0)
 
 		self.harmonizes[pad] = set()
@@ -665,7 +562,7 @@ class Chord(Application):
 					self.recording = None
 					self.rootmode = False
 
-			elif on and self.recording is not None and button in ['left', 'right']: # a chord button is held, arrow key pressed
+			elif on and self.recording is not None and button in ['left', 'right']: # a chord button is held and arrow key pressed
 				displacement = 1 if button == 'left' else - 1
 				newsaves = set((a + displacement) % n for a in self.owner.saves[self.recording])
 				newroots = set((a + displacement) % n for a in self.owner.roots[self.recording])
@@ -760,8 +657,7 @@ class Velocity(Application):
 		skip = 2 ** 7 // size
 		for x in range(size):
 			for t in range(skip):
-				self.curve[x * skip + t] = min(2 ** 7 - 1, max(0, \
-					int((1 - t / skip) * skip * bars[x] + (t / skip) * skip * bars[x+1])))
+				self.curve[x * skip + t] = min(2 ** 7 - 1, max(0, int((1 - t / skip) * skip * bars[x] + (t / skip) * skip * bars[x+1])))
 
 		self.curve[0] = 0
 

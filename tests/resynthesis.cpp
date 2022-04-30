@@ -20,15 +20,21 @@ void interrupt(int ignore)
 	running = false;
 }
 
-const int N = 256;
-const double R = 0.99;
+std::complex<double> transfer(double frequency, double r, double f)
+{
+	std::complex<double> z(cos(2 * PI * f / SR), -sin(2 * PI * f / SR));
+	return (1.0 - z * z) / (1.0 - 2 * r * cos(2 * PI * frequency / SR) * z + r * r * z * z);
+}
+
+const int N = 20;
+const double R = 0.999;
 Filterbank<double> bank(2, N);
 
 inline int process(const float* in, float* out)
 {
 	for (int i = 0; i < BSIZE; i++)
 	{
-		out[2 * i] = out[2 * i + 1] = limiter(bank((double)in[i] / (N / 3)));
+		out[i] = limiter(bank((double)in[i]) / N);
 		bank.tick();
 	}
 
@@ -41,11 +47,13 @@ int main()
 {
 	for (int i = 0; i < N; i++)
 	{
-		double cosine = cos((PI * i) / N);
-		bank.coefficients(1.0 / N, {1}, {0, -2 * R * cosine, R * R}, i);
+		double frequency = 0.5 * (i + 1) * SR / N;
+		double cosine = cos(2 * PI * frequency / SR);
+		double gain = abs(transfer(frequency, R, frequency));
+		bank.coefficients(i, {1.0 / gain, 0, -1.0 / gain}, {-2 * R * cosine, R * R});
 	}
 
-	A.startup(1, 2, true); // startup audio engine; 1 input, 2 outputs, console output on
+	A.startup(1, 1, true); // startup audio engine; 1 input, 2 outputs, console output on
 
 
 	while (running)

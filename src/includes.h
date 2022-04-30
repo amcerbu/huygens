@@ -15,12 +15,13 @@
 
 #include <portaudio.h>
 #include "RtMidi.h"
+#include <Eigen/Dense>
 
 typedef unsigned long ulong;
 
 const double PI = 3.14159265359;
 const double E =  2.718281828459045;
-const int SR = 48000;
+const int SR = 48000;;
 const int FORCE = 50000;
 const double A4 = 440.0; // frequency of the A above middle C; tune if necessary
 
