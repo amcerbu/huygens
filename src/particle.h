@@ -21,6 +21,7 @@ public:
 	}
 
 	Particle(double d = 0.01)
+	// Particle(double d = 10)
 	{
 		drag = relaxation(d);
 	}

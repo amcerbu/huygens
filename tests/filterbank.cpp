@@ -50,26 +50,28 @@ double saturate(double sample)
 const int courses = 9; // "strings" per notes coursed,
 const int octaves = 8; // number of octaves
 const double division = 12; // edo
-const double detune = 0.125; // tuning margin of error (fraction of edo)
+// const double detune = 0.125; // tuning margin of error (fraction of edo)
+const double detune = 0.125;
 const int N = division * octaves * courses; // lots of filters!
 double frequency = 27.5; // A0
 int A0 = 21;
-double tail = 50;
+double tail = 100;
 double r = relaxation(tail);
 
 double rolloff = 1;
 double gains[N];
 double amplitudes[N];
 
-Filterbank<double> F(2, N);
+Filterbank<double> F(2, N, 0.001, 1);
 
 Noise<double> noise;
 RMS<double> rms;
+// double air = 0;
+double noisefloor = 0;
 double air = 0;
-// double air = 0.25;
-double airmod = 0.25;
-// double airmod = 0;
-double dry = 1;
+// double airmod = 0.125;
+double airmod = 0;
+double dry = 0;
 double distorted = 0.1;
 double drive = 5;
 double follow = 0;
@@ -82,7 +84,7 @@ inline int process(const float* in, float* out)
 	{
 		the_sample = softclip(dry * in[i] +
 							 	((1 - follow) + follow * rms(in[i])) * (1 + rms(in[i]) * airmod * noise()) * 
-							 		F(softclip(drive * in[i] + rms(in[i]) * air * noise()), &softclip), 0.9);
+							 		F(softclip(noisefloor * noise() + drive * in[i] + rms(in[i]) * air * noise()), &softclip), 0.9);
 
 		// the_sample = in[i] - (softclip(1000 * (the_sample - in[i]))) * (the_sample - in[i]);
 		// the_sample = softclip(F(noise(), &softclip));
@@ -138,7 +140,7 @@ void coefficients()
 	{
 		for (int j = 0; j < courses; j++)
 		{
-			double partial = frequency * pow(2, (i + (2 * (j + 0.5) / (double)courses - 1) * detune) / division);
+			double partial = frequency * pow(2, (i + detune * pow((2 * (j + 0.5) / (double)courses - 1), 1)) / division);
 
 			double angle = partial * (2 * PI / SR);
 			gains[courses * i + j] = 1.0 / abs(transfer(partial, r, partial));

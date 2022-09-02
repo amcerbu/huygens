@@ -172,7 +172,7 @@ class Application:
 		self.piano = np.array([-1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0]) # C : -1, white : 0, black : 1
 		
 		# [neutral, pressed, triggered, sympathized, sympathizing] x [white, black, C]
-		self.keycolor = np.array([[119, 0, 96], [40, 41, 10], [88, 101, 88], [104, 112, 92], [6, 7, 5]], dtype = 'byte')
+		self.keycolor = np.array([[119, 0, 96], [40, 41, 60], [88, 101, 94], [104, 112, 92], [6, 7, 5]], dtype = 'byte')
 
 		self.bins = {name : i for i, name in enumerate( \
 			['track_1', 'track_2', 'track_3', 'track_4', 'track_5', 'track_6', 'track_7', 'track_8', \

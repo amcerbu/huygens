@@ -2,8 +2,9 @@ import numpy as np
 from mpl_toolkits.mplot3d import Axes3D 
 import matplotlib.pyplot as plt
 from matplotlib import cm
+from random import random
 
-from mayavi import mlab
+# from mayavi import mlab
 
 from importlib import reload
 
@@ -226,3 +227,85 @@ def softclip(sample, width = 0.5):
 	sgn = int(0 < sample) - int(0 > sample)
 	gap = sample - sgn * width;
 	return sgn * width + (1 - width) * 2 / np.pi * np.math.atan(np.pi * gap / (2 * (1 - width)))
+
+
+def onepole(r, freq):
+	F = Filter([1], [1, -r * np.exp(ftoa(freq) * 1j)])
+	normalization = np.abs(F.z(np.exp(ftoa(freq) * 1j)))
+	return (1 / normalization) * F
+
+def sigma(x):
+	return x
+
+def coupler(f1, f2, k = 0.001, r = 0.99, N = 100):
+	F = onepole(r, f1)
+	G = onepole(r, f2)
+
+	F.forget()
+	G.forget()
+	oldF = 0
+	oldG = 0
+
+	Fresult = np.zeros(N, dtype = 'complex')
+	Gresult = np.zeros(N, dtype = 'complex')
+	for i in range(N):
+		Fresult[i] = oldF
+		Gresult[i] = oldG
+		oldF = F((int)(not i) + k * sigma(oldG - oldF))
+		oldG = G((int)(not i) + k * sigma(oldF - oldG))
+		F.tick()
+		G.tick()
+
+	return Fresult, Gresult
+
+def noise_coupler(f1, f2, k = 0.001, r = 0.99, N = 100):
+	F = onepole(r, f1)
+	G = onepole(r, f2)
+
+	F.forget()
+	G.forget()
+	oldF = 0
+	oldG = 0
+
+	Fresult = np.zeros(N, dtype = 'complex')
+	Gresult = np.zeros(N, dtype = 'complex')
+	for i in range(N):
+		noise = random()
+		Fresult[i] = oldF
+		Gresult[i] = oldG
+		oldF = F(noise + k * sigma(oldG - oldF))
+		oldG = G(noise + k * sigma(oldF - oldG))
+		F.tick()
+		G.tick()
+
+	return Fresult, Gresult
+
+# demonstration of coupling / decoupling on noisy signals, depending on frequency proximity. 
+# A, B = noise_coupler(440, 445, k = 0.01, r = 0.9999, N = 10000); plt.plot(A); plt.plot(B); plt.show()
+# A, B = noise_coupler(440, 550, k = 0.01, r = 0.9999, N = 10000); plt.plot(A); plt.plot(B); plt.show()
+
+if __name__ == '__main__':
+	noise = np.zeros(N, dtype = 'complex')
+	for i in range(N):
+		noise[i] = (2 * (random() - 0.5) + 2 * (random() - 0.5) * 1j)
+				# = 2 * (random() - 0.5) * Fresult[i - 1] * 1j / np.abs(Fresult[i - 1]) ** 2 # proportional noise
+
+	for i in range(N):
+		if random() > 0.001:
+			noise[i] = 0
+
+	N = 100000
+	f = 220
+	r = 0.999
+	F = onepole(r, f)
+	F.forget()
+	Fresult = np.zeros(N, dtype = 'complex')
+	Fresult[-1] = 1
+	Reference = np.array([np.exp(i * ftoa(f) * 1j) for i in range(N)])
+	for i in range(N):
+		Fresult[i] = F(noise[i])
+		F.tick()
+
+
+	Presult = Fresult / Reference
+	plt.plot(np.real(Fresult)); plt.plot(np.real(Presult)); plt.plot(np.imag(Presult));  plt.show()

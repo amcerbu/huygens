@@ -122,9 +122,9 @@ namespace soundmath
 		T endpoint; // if (this->periodic == false), provides a value for (*this)(right)
 	};
 
-	Wave<double> saw([] (double phase) -> double { return 2 * phase - 1; });
-	Wave<double> triangle([] (double phase) -> double { return abs(fmod(4 * phase + 3, 4.0) - 2) - 1; });
-	Wave<double> square([] (double phase) -> double { return phase > 0.5 ? 1 : (phase < 0.5 ? -1 : 0); });
+	Wave<double> saw([] (double phase) -> double { return 2 * phase - 1; }, Interp::linear);
+	Wave<double> triangle([] (double phase) -> double { return abs(fmod(4 * phase + 3, 4.0) - 2) - 1; }, Interp::linear);
+	Wave<double> square([] (double phase) -> double { return phase > 0.5 ? 1 : (phase < 0.5 ? -1 : 0); }, Interp::none);
 	Wave<double> phasor([] (double phase) -> double { return phase; }, Interp::linear);
 	// Wave<double> noise([] (double phase) -> double { return  2 * ((double)rand() / RAND_MAX) - 1; }, Interp::linear);
 	Wave<double> cycle([] (double phase) -> double { return sin(2 * PI * phase); });

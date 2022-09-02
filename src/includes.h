@@ -1,5 +1,6 @@
 // includes.h
 
+#define PORTAUDIO
 #ifndef INCLUDED
 
 #include <stdexcept>
@@ -13,7 +14,14 @@
 #include <complex>
 #include <algorithm>
 
+#ifdef PORTAUDIO
 #include <portaudio.h>
+#endif
+
+#ifdef SOUNDIO
+#include <soundio>
+#endif
+
 #include "RtMidi.h"
 #include <Eigen/Dense>
 

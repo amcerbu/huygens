@@ -66,7 +66,8 @@ namespace soundmath
 			for (int i = 0; i < voices; i++)
 				if (amplitudes[i])
 					for (int j = 0; j < overtones; j++)
-						out += amplitudes[i] * pow(decay, j) * softclip(pow(decay, j) * (*filters[i * overtones + j])(sample)) / (voices * normalization);
+						out += amplitudes[i] * softclip(pow(decay, j) * (*filters[i * overtones + j])(sample)) / (voices * normalization);
+						// out += amplitudes[i] * pow(decay, j) * ((*filters[i * overtones + j])(sample)) / (voices * normalization);
 
 			return out;
 		}
@@ -80,7 +81,7 @@ namespace soundmath
 		T resonance;
 
 		// clips (-infty, infty) to (-1, 1); linear in (-width, width)
-		T softclip(T sample, T width = 0.5)
+		T softclip(T sample, T width = 0.99)
 		{
 			if (abs(sample) < width)
 				return sample;

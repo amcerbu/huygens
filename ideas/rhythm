@@ -1,0 +1,138 @@
+things to improve:
+
+1	make all audio programs inherit from some class that provides a few additional functions:
+	a	allow configuration of devices, parameters, etc., during the program's execution. this means, at minimum, writing some
+		boilerplate terminal program that reads for "--density 10" or something... eventually a more general version.
+		i.	should parameter be a class? maybe a parameter is a value that is scoped in some way and accessible (or shared)
+			by some collection of objects. the idea being to prevent different objects from copying values around and instead
+			for them simply to look all in the same "place" for a value
+	b	include a sample counter in the audio class -- this may simplify computation (objects that tick() once per sample
+		can share the data of the current sample count; objects that sleep, e.g. metronomes, can operate using a scheduler
+		instead of checking things once per sample). 
+		i	48000 samples / second * 50 years * 365.24 days / year * 24 hrs / day * 60 mins / hr * 60 secs / min = 75,738,240,000,000 samples
+			a long long has maximum value 2^63 -1, or...													9,223,372,036,854,775,807
+2 	make a visual interface (e.g. in javascript?). a first step, for example, is to build a visual interface that mirrors the Launchpad,
+	or the parameters of the granular synth.
+	a	develop a protocol for the visuals and audio to talk to one another
+
+
+things to build:
+1	rhythm machine. choice of representation for this object depends on the kinds of symmetries i consider important in
+	rhythmic material. here are some examples:
+	a	a beat is a tuple of length-n binary strings, each representing the ticks at which a percussive voice is active. 
+		limitations: this is a looped approach - the resulting beat is periodic and has no dynamics.
+		softenings:
+		i	instead of binary strings we have strings of reals, maybe with some enforced sparsity
+		ii	
+
+	b	a beat is like a chord progression, except that pitch is replaced by "position in the form." we also allow / incentivize
+		parallel motion; the cost of a "voice leading" is measured temporally: once one beat moves, all others after it move along
+		in the same direction. so for example, the voice leading below
+		x _ _ o _ _ x _ _ x _ _ o _ _ _
+		x _ o _ _ x _ _ x _ _ _ o _ _ _
+		incurs a cost of 1 + 1, since first we've shifted the pattern left, then right. we are really comparing the measurements of the gaps:
+		(3, 3, 3, 3, 4) and (2, 3, 3, 4, 4). then we'd need to come up with an appropriate notion of splitting and merging of voices. 
+
+	c	there's always lurking the perturbative question - feel as "just intonation" for rhythm. what's the right way to think about that?
+		you might get interesting results by checking when a pattern is nearly even, and then perturbing it in the direction of being even.
+		this leads to natural polyrhythmic behavior. 
+
+
+2	cymbal synthesizer. some sort of filter network with distortions?
+	a	what happens if you have an ensemble of filters, each representing a concentric rings on the cymbal,
+		coupled with distortions? e.g. let's say we have N resonant bandpass filters F1, ..., FN
+		that evolve such that the input to Fi is sigma((F(i-1) + F(i+1)). N ought to be large, and the center frequencies
+		should be chosen based on the geometry of the ``cymbal,'' e.g. related to the circumference at given radial position. 
+		i.	the coupling needs to be chosen small enough that things don't blow up. 
+	b	really should study wave equation for stiff ring (should be similar to that of a string, except the boundary conditions
+		are now periodicity instead of zero). then we have these stiff rings coupled to one another.
+	c	hitting the cymbal at different positions can be achieved by exciting one of the N rings; this should give different timbre
+	d	i need some sort of dynamical system that will exhibit chaos -- so i can get broadband effects. 
+
+3	self-tuning synth via energy dissipation, rather than particle model. might be easier if we allow complex signals:
+	a	subtractive synthesis via filters with a single pole at r e^(i angle). now oscillators are points on the circle.
+	b	can the oscillators interact with one another? e.g. is there some way to remove energy from the system when
+		two oscillators are out of phase? one way to do this is to introduce a weak coupling term among all oscillators. this
+		term needs to be chosen very small so that the system is stable. 
+		i	for example, suppose we have filters F and G with poles at r e^(i f) and r e^(i g). We drive both F and G with noise.
+			F_n = x_n + r e^(i f) F_{n-1} + k sigma(G_{n-1} - F_{n-1})
+			G_n = x_n + r e^(i g) G_{n-1} + k sigma(F_{n-1} - G_{n-1})
+
+			it fucking works for impulse responses: we get synchornization and damping behavior. 
+			coupling coefficient needs to be weighted by the difference in center frequencies; otherwise oscillators far apart in frequency
+			damp one another out. 
+
+			resonant filters are really the right area in which to implement this idea since technically a resonant filter can be driven
+			(suboptimally) at frequencies other than its center frequency. this is exactly the idea: we get the filters to drive one another,
+			maybe off their center frequencies. this seems like a much more natural self-tuning principle. 
+
+			difference choices of sigma give interesting results - but it seems like linear works fine. 
+			now, how to implement in BIG network of filters?
+
+			so we have m filters, F_1, ...., F_m, with
+			(F_j)_n = x_n + r e^(i f_j) (F_j)_{n-1} + sum_{l ≠ j} k_{lk} ((F_l)_{n-1} - (F_k)_{n-1})
+
+			tentatively: set k_{lk} = k / (f_j - f_k) ** 2
+
+
+			check-in: it seems that if k is even a little bit too large, we get horribly unstable behavior
+
+4	filters with stochastic coefficients. e.g., how does a filter behave if its coefficients are perturbed? modulated?
+	can you downsample an impulse response by replacing it with a stochastic process? i.e., instead of viewing a timbre
+	transformation as a dense convolution with a fixed impulse response, view it as a sparse convolution with a stochastic
+	impulse response. granular synthesis is almost an example of such a process, if there is no pitch-shifting and the windows
+	always overlap (right?). 
+
+	next question: is there some kind of laplace transform for analyzing granular synthesis?
+
+5	assisted improviser. three parts here.
+	a	a system that, given a tune, defined as a set of chords, finds and plays a sequence of voices that "comp" nicely.
+		at this point, i've basically built this part. 
+	b	a system that, given a tune and a stream of "contour" info, chooses a melody that follows the countour and sits properly
+		over the harmony. 
+	c	a system that, given a stream of melodic info, and perhaps a tune, chooses a sequence of chords that comp the melody,
+		and allow certain excursions, while remaining tethered in some way to the form. 
+		i	developing this segment will require me to formalize what a "reharmonization" is. my instinct is this: a naive harmonization
+			is a path with some nice distance-minimizing or near-minimizing properties, whose image under the projection-to-pitch-class-set-map
+			passes through a set of waypoints, called the "admissible chords." 
+
+		ii	a reharmonization should be a path in an annulus around the path upstairs that has similar nice distance-minimizing properties,
+			and such that the image downstairs stays inside some set of permissible chord qualities. since the reharmonization has a choice of chord
+			quality, it may be possible to decrease the distance.
+			
+			a good first step might be to introduce interpolations: if there is an interpolating chord, allow the program to take it. i suspect this
+			might be difficult to accomplish convincingly without telling the program about functional harmony. i don't have an issue with functional
+			harmony, but i'd rather that it arise from first principles; that the program discover it on its own. my instinct is that the program should
+			generate a meta-chord-progression given the naive one, which is no longer linear but instead has the shape of a band: for each pair i < j,
+			the program finds some sort of chordal centroid (likely with more pitches) among chords between indices i and j. this may only be necessary in a
+			band of some small width. the extent to which this is possible informs the harmonic rhythm; when the chordal centroid is far away from a window of
+			four chords, it means the harmony is changing quickly there. 
+			
+			the question is: how do i enforce the behavior of playing "in" (and therefore, eventually, "out") without telling the program about scales? i want the
+			only input to be chords, and i don't want to hard-code some sort of "M7 implies major or lydian" behavior. 
+
+		iii	another type of reharmonization is the one that, for example, swaps out the fifth with the sixth in a major seven chord. this might be defined
+			as a perturbation of the naive voicing by some small vector in a way that is favorable for voice-leading. the difficulty is to do this in such
+			a way that the function of the chord isn't changed - e.g., you don't want to allow the program to flat the seven of a major chord, even if that
+			decreases voice-leading distance. or maybe that would never happen, because dominant sevents tend to resolve down to the thirds of the tonic?
+
+6	transposition engine; timbre transformer; pitch-remapper
+	a	so far, plenty of success with remapping via modulate - low-pass - demodulate. the next
+		question is, can this be improved? perhaps the next things to implement are RMSbank and
+		Trigbank:
+		i	RMSbank: a bunch of RMS operators in parallel, take as input a multichannel signal
+			and spit out a multichannel signal. maybe includes some DC-blocking. also,
+			implementation of RMS is nearly equivalent to sliding discrete fourier transform;
+			could be useful to experiment with that. (for efficient implementation of RMSbank
+			i'll need to figure out how to do sparse linear algebra in eigen)
+		ii	Trigbank: takes as input an (analog) signal and spits out a digital signal, according
+			to the following logic:
+			
+
+			
+
+
+chords recognized by ireal pro: (a starting place... not somewhere to end up)
+
+5, 2, add9, +, o, h, sus, ^, -, ^7, -7, 7, 7sus, h7, o7, ^9, ^13, 6, 69, ^7#11, ^9#11, ^7#5, -6, -69, -^7, -^9, -9, -11, -7b5, h9, -b6, -#5, 9, 7b9, 7#9, 7#11, 7b5, 7#5, 9#11, 9b5, 9#5, 7b13, 7#9#5, 7#9b5, 7#9#11, 7b9#11, 7b9b5, 7b9#5, 7b9#9, 7b9b13, 7alt, 13, 13#11, 13b9, 13#9, 7b9sus, 7susadd3, 9sus, 13sus, 7b13sus, 11
+

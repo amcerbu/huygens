@@ -3,6 +3,7 @@
 #include "../src/metro.h"
 #include "../src/filter.h"
 #include "../src/midi.h"
+#include "../src/delay.h"
 #include <signal.h>
 
 using namespace std;
@@ -18,27 +19,32 @@ void interrupt(int ignore)
 }
 
 // Metro<double> physics(SR); // rate of physics computation
-Metro<double> physics(SR / 4); // rate of physics computation
-// Additive<double> addi(&cycle, 10, 11, 0.5); // sinusoids, 10 voices, 11 overtones, decay coeff 0.7
-Additive<double> addi(&saw, 10, 7, 0.5); // triangle waves, 10 voices, 7 overtones, decay coeff 0.5
+Metro<double> physics(SR / 2); // rate of physics computation
+Additive<double> addi(&cycle, 10, 7, 0.66, 1); // sinusoids, 10 voices, 11 overtones, decay coeff 0.7
+// Additive<double> addi(&cycle, 10, , 0.5); // triangle waves, 10 voices, 7 overtones, decay coeff 0.5
 Filter<double> smoother1({1, 4, 6, 4, 1}, {0}); // quadruple zero at Nyquist
-Filter<double> smoother2({1}, {0, -0.9}); // low-pass
+Filter<double> smoother2({1,-1}, {0, -0.999}); // low-pass
+
+Delay<double> chandelay(1, SR);
 
 inline int process(const float* in, float* out)
 {
 	for (int i = 0; i < BSIZE; i++)
 	{
-		float sample = smoother2(addi());
+		float sample = (addi());
 		out[2 * i] = sample;
 		out[2 * i + 1] = sample;
+		// out[2 * i + 1] = chandelay(sample);
 
 		if (physics())
 			addi.physics();
 
 		addi.tick();
 		physics.tick();
-		// smoother1.tick();
+		// smoother.tick();
+		// chandelay.tick();
 		smoother2.tick();
+		// smoother2.tick();
 	}
 
 	return 0;
@@ -88,6 +94,8 @@ MidiIn MI = MidiIn();
 
 int main()
 {
+	chandelay.coefficients({{2000,1}},{});
+
 	// bind keyboard interrupt to program exit
 	signal(SIGINT, interrupt);
 

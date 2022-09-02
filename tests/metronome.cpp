@@ -1,4 +1,5 @@
 #include "../src/metro.h"
+#include "../src/synth.h"
 #include "../src/filter.h"
 #include "../src/noise.h"
 #include "../src/audio.h"
@@ -35,17 +36,14 @@ inline int process(const float* in, float* out)
 		if (metronome())
 		{
 			gain = 1;
-			lag = elapsed;
+			lag = elapsed; // count samples between metro clicks
 			elapsed = 0;
 			flag = true;
 		}
-		else
-		{
-			gain *= 0.95;
-			elapsed++;
-		}
+		gain *= 0.95;
+		elapsed++;
 
-		float sample = 0.75 * filter(0.5 * gain);
+		float sample = 0.75 * filter(0.5 * gain) * noise();
 		out[2 * i] = sample;
 		out[2 * i + 1] = sample;
 

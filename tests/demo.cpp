@@ -37,7 +37,7 @@ double oldphases[N];
 double amps[N];
 double oldamps[N];
 
-const double advance = 2 * PI / LAPS; // expected phase advance for bin-centered sinusoid
+const double the_advance = 2 * PI / LAPS; // expected phase advance for bin-centered sinusoid
 
 /*
 a sinusoid centered on bin j will complete i oscillations per frame; thus we expect it
@@ -59,7 +59,7 @@ inline int f_process(const complex<double>* in, complex<double>* out)
 	for (int i = 0; i < N / 2; i++)
 	{
 		static double delta = fmod(phases[i] - oldphases[i] + 2 * PI, 2 * PI);
-		static double discrep = delta - i * advance;
+		static double discrep = delta - i * the_advance;
 		discrep = fmod(discrep + 3 * PI, 2 * PI) - PI;
 
 

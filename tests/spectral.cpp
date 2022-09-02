@@ -42,7 +42,7 @@ inline int f_process(const complex<double>* in, complex<double>* out)
 
 	for (int i = 0; i < N; i++)
 	{
-		if (norm(in[i]) > 100 * average * average)
+		if (norm(in[i]) < 100 * average * average)
 		{
 			// out[i] = in[i] / 20.0;
 			out[i] = 0;

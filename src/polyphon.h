@@ -64,7 +64,8 @@ namespace soundmath
 			for (int i = 0; i < voices; i++)
 			{
 				springs[i * overtones].bind(&guides[i], &particles[i * overtones]);
-				springs[i * overtones].strength(2 * FORCE);
+				// springs[i * overtones].strength(2 * FORCE);
+				springs[i * overtones].strength(0 * FORCE);
 				for (int j = 1; j < overtones; j++)
 				{
 					springs[i * overtones + j].bind(&particles[i * overtones + j - 1], &particles[i * overtones + j]);
@@ -81,6 +82,7 @@ namespace soundmath
 						{
 							gravities[count].bind(&particles[i * overtones + k], &particles[j * overtones + m]);
 							gravities[count].strength(1 * FORCE);
+							// gravities[count].strength(100 * FORCE);
 							count++;
 						}
 		}

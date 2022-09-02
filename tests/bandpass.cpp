@@ -27,16 +27,16 @@ inline int process(const float* in, float* out)
 {
 	for (int i = 0; i < BSIZE; i++)
 	{
-		float sample = (bp(noise()) + bp2(noise()) + bp3(noise())) / 6;
-		if (sample > 1 || sample < -1)
-			cout << "clipping failure" << endl;
+		float sample = (bp(noise()) + bp3(noise())) / 6;
+		// if (sample > 1 || sample < -1)
+			// cout << "clipping failure" << endl;
 
-		out[2 * i] = sample;
-		out[2 * i + 1] = sample;
+		out[2 * i] = limiter(sample);
+		out[2 * i + 1] = limiter(sample);
 
-		bp.resonant(300 + 3 * bplfo(), 0.99999);
+		bp.resonant(300 + 3 * bplfo() + 300 * bp2(noise()), 0.99999);
 		bp2.resonant(450 + 4.5 * bplfo(), 0.99999);
-		bp3.resonant(750 + 7.5 * bplfo(), 0.99999);
+		// bp3.resonant(750 + 7.5 * bplfo(), 0.99999);
 
 		bp.tick();
 		bp2.tick();

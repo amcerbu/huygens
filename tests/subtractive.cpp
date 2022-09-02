@@ -3,6 +3,7 @@
 #include "../src/noise.h"
 #include "../src/metro.h"
 #include "../src/midi.h"
+#include "../src/delay.h"
 #include <signal.h>
 
 using namespace std;
@@ -29,13 +30,16 @@ double the_sample;
 
 Filter<double> smoother({0.0001},{0,-0.9999});
 Filter<double> nyquist({1,0.5}, {0});
+Delay<double> chandelay(1, SR);
 
 inline int process(const float* in, float* out)
 {
 	for (int i = 0; i < BSIZE; i++)
 	{
 		the_sample = sub(excitation());
-		out[i] = the_sample; // limiter(air * the_sample) + attenuation * limiter(boost * smoother(gain) * the_sample);
+		out[2 * i] = the_sample; // limiter(air * the_sample) + attenuation * limiter(boost * smoother(gain) * the_sample);
+		out[2 * i + 1] = the_sample;
+		// out[2 * i + 1] = chandelay(the_sample);
 
 		if (physics())
 			sub.physics();
@@ -44,6 +48,7 @@ inline int process(const float* in, float* out)
 		physics.tick();
 		excitation.tick();
 		smoother.tick();
+		// chandelay.tick();
 	}
 
 	return 0;
@@ -110,7 +115,7 @@ MidiIn MI = MidiIn();
 int main()
 {
 	memset(pressures, 0, 128 * sizeof(unsigned char));
-
+	chandelay.coefficients({{2000,1}},{});
 	// bind keyboard interrupt to program exit
 	signal(SIGINT, interrupt);
 
@@ -119,7 +124,7 @@ int main()
 	MI.getports(false); // get ports but don't print anything
 	MI.open("IAC Driver Bus 1");
 
-	A.startup(1, 1, true); // startup audio engine; 1 input, 1 output, console output on
+	A.startup(1, 2, true); // startup audio engine; 1 input, 1 output, console output on
 
 	while (running)
 	{
