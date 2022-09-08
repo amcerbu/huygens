@@ -553,7 +553,7 @@ if colorcube:
 port = 'IAC Driver Bus 1'
 
 tune = 'cyclic episode'
-charted = False
+charted = True
 rootless = False
 if charted:
     tempo = 2.5

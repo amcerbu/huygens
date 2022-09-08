@@ -52,7 +52,7 @@ inline int process(const float* in, float* out)
 		out[2 * i] = (float)sample;
 		out[2 * i + 1] = (float)sample;
 
-		sensitivity = (1 + lfo()) / 120;
+		sensitivity = (lfo()) / 240;
 		// sensitivity = 1.0 / 120;
 		for (int j = 0; j < n; j++)
 			for (int k = j + 1; k < n; k++)

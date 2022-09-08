@@ -74,7 +74,6 @@ things to build:
 
 			tentatively: set k_{lk} = k / (f_j - f_k) ** 2
 
-
 			check-in: it seems that if k is even a little bit too large, we get horribly unstable behavior
 
 4	filters with stochastic coefficients. e.g., how does a filter behave if its coefficients are perturbed? modulated?

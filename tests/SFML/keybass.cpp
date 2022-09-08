@@ -16,7 +16,7 @@
 #define RADIUS 100
 #define MARGIN 0.1
 #define kb sf::Keyboard
-#define GUI false // turn gui on?
+#define GUI true // turn gui on?
 
 #define WIDTH (13 + MARGIN) * RADIUS
 #define HEIGHT (5 + MARGIN) * RADIUS
@@ -332,7 +332,7 @@ int main()
 
 			for (int i = bottom; i < bottom + span; i++)
 			{
-				if (deltas[i] == 1)
+				if (deltas[i] == 1 && kb::isKeyPressed(kb::Space))
 				{
 					// std::cout << i << " pressed." << std::endl;
 					std::vector<unsigned char> message({{144, (unsigned char)(i), 127}});

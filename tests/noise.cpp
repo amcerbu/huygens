@@ -17,7 +17,7 @@ void interrupt(int ignore)
 	running = false;
 }
 
-const int N = 100;
+const int N = 800;
 Filterbank<double> F(2, N);
 Noise<double> noise;
 Synth<double> lfo(&cycle, 2);
@@ -25,8 +25,7 @@ Synth<double> lfo(&cycle, 2);
 double gains[N];
 double r = 0.9999;
 double decay = 0.85;
-double fundamental = 110;
-double offset = 1;
+double fundamental = 40;
 
 std::complex<double> transfer(double frequency, double r, double f);
 

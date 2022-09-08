@@ -4,7 +4,7 @@
 base=${1%.cpp}
 
 build () {
-	g++ -Wall -O3 -std=c++17 $1 -o $outname -I /usr/local/include/eigen3 -I /usr/local/include/rtmidi -l fftw3 -l m -l portaudio -l ncurses -l rtmidi -include ../src/tinyosc.cpp
+	g++ -Wall -O3 -std=c++17 $1 -o $outname -I /usr/local/include/eigen3 -I /usr/local/include/rtmidi -l fftw3 -l m -l portaudio -l soundio -l ncurses -l rtmidi -include ../src/tinyosc.cpp
 }
 
 if [ -z "$base" ]

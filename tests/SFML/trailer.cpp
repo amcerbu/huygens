@@ -21,8 +21,8 @@
 
 
 #define DARKNESS 255
-#define LINEALPHA 200
-#define ALPHA 127
+#define LINEALPHA 192
+#define ALPHA 64
 #define LIGHTNESS 0
 
 using namespace soundmath;
@@ -174,7 +174,8 @@ int main()
 		{
 			sf::CircleShape circle(RADIUS);
 			circle.setPosition(waveform[i].position);
-			circle.setFillColor(sf::Color(0, 0, 0, 255 * (std::pow(0.5, (double)(i - waveSize * (!flipped)) / waveSize))));
+			// circle.setFillColor(sf::Color(0, 0, 0, 255 * (std::pow(0.5, (double)(i - waveSize * (!flipped)) / waveSize))));
+			circle.setFillColor(sf::Color(0,0,0, LINEALPHA));
 			window.draw(circle);
 		}
 

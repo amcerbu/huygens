@@ -1,6 +1,8 @@
 // wave.h
 #include "includes.h"
 
+#define FUNCTIONAL
+
 #ifndef WAVE
 
 namespace soundmath
@@ -20,6 +22,7 @@ namespace soundmath
 
 		Wave(std::function<T(double)> shape, Interp interp = Interp::cubic, T left = 0, T right = 1, bool periodic = true)
 		{
+			this->shape = shape;
 			this->interp = interp;
 			this->left = left;
 			this->right = right;
@@ -59,6 +62,15 @@ namespace soundmath
 				   table[later]  * ((disp + 1) * (disp + 0) * (disp - 1)) / (( 2 + 1) * ( 2 - 0) * ( 2 - 1));
 		}
 
+		#ifdef FUNCTIONAL 
+
+		T lookup(T input)
+		{
+			return shape(input);
+		}
+
+		#else 
+
 		T lookup(T input)
 		{
 			T phase = (input - left) / (right - left);
@@ -95,6 +107,8 @@ namespace soundmath
 			}
 		}
 
+		#endif
+
 		T operator()(T phase)
 		{
 			return lookup(phase);
@@ -120,6 +134,9 @@ namespace soundmath
 		bool periodic;
 
 		T endpoint; // if (this->periodic == false), provides a value for (*this)(right)
+
+		std::function<T(double)> shape;
+
 	};
 
 	Wave<double> saw([] (double phase) -> double { return 2 * phase - 1; }, Interp::linear);
