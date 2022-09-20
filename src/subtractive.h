@@ -66,8 +66,8 @@ namespace soundmath
 			for (int i = 0; i < voices; i++)
 				if (amplitudes[i])
 					for (int j = 0; j < overtones; j++)
-						out += amplitudes[i] * softclip(pow(decay, j) * (*filters[i * overtones + j])(sample)) / (voices * normalization);
-						// out += amplitudes[i] * pow(decay, j) * ((*filters[i * overtones + j])(sample)) / (voices * normalization);
+						// out += amplitudes[i] * softclip(pow(decay, j) * (*filters[i * overtones + j])(sample)) / (voices * normalization);
+						out += amplitudes[i] * pow(decay, j) * ((*filters[i * overtones + j])(sample)) / (voices * normalization);
 
 			return out;
 		}

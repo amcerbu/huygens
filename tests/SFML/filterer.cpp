@@ -11,9 +11,7 @@
 #include "../../src/slidebank.h"
 #include "../../src/modbank.h"
 #include "../../src/mixer.h"
-
-#define CHANS 1
-#define INPUT 0
+#include "../../src/argparse.h"
 
 #define WIDTH 1600
 #define HEIGHT 1600
@@ -21,10 +19,10 @@
 
 #define DARKNESS 255
 #define ALPHA 64
-#define LINEALPHA 127
+#define LINEALPHA 96
 #define LIGHTNESS 0
 
-#define BSIZE 64
+#define BSIZE 512
 #define FRAMERATE 60
 #define INCREMENT 1
 
@@ -34,6 +32,59 @@
 #define A0 21
 
 using namespace soundmath;
+
+int CHANS;
+int INPUT;
+int DEVICE;
+
+void args(int argc, char *argv[])
+{
+	argparse::ArgumentParser program("filterer");
+
+	int def_in = 0;
+	int def_out = 0;
+	Audio::initialize(false, &def_in, &def_out);
+
+	program.add_argument("-i", "--input")
+		.default_value<int>((int)def_in)
+		.required()
+		.scan<'i', int>()
+		.help("device id for audio in");
+
+	program.add_argument("-f", "--framesize")
+		.default_value<int>(1)
+		.required()
+		.scan<'i', int>()
+		.help("channels per frame");
+
+	program.add_argument("-c", "--channel")
+		.default_value<int>(0)
+		.required()
+		.scan<'i', int>()
+		.help("input channel");
+
+	program.add_argument("-d", "--devices")
+		.help("list audio device names")
+		.default_value(false)
+		.implicit_value(true);
+
+	try
+	{
+		program.parse_args(argc, argv);
+	}
+	catch (const std::runtime_error& err)
+	{
+		std::cerr << err.what() << std::endl;
+		std::cerr << program;
+		std::exit(1);
+	}
+
+	DEVICE = program.get<int>("-i");
+	CHANS = program.get<int>("-f");
+	INPUT = program.get<int>("-c");
+	Audio::initialize(!(program.is_used("-i") && program.is_used("-f") && program.is_used("-c")) || program.is_used("-d"));
+}
+
 
 const int waveSize = (SR / INCREMENT) / FRAMERATE;
 sf::Vertex waveforms[2 * waveSize * CHROMATIC * OCTAVES];
@@ -48,9 +99,11 @@ bool flipped = false;
 
 int pitch = 24;
 
-// double filter_r = 0.999;
-double filter_r = 0.996;
-int multiplicity = 3;
+// double filter_r = 0.9999;
+// double filter_r = 0.996;
+// int multiplicity = 3;
+double filter_r = 0.999;
+int multiplicity = 1;
 Oscbank<double, CHROMATIC * OCTAVES> oscbank;
 Slidebank<double, CHROMATIC * OCTAVES> slidebank;
 Modbank<double, CHROMATIC * OCTAVES> modulators; // modulation
@@ -58,6 +111,28 @@ Modbank<double, CHROMATIC * OCTAVES> modulators; // modulation
 double xs[CHROMATIC * OCTAVES];
 double ys[CHROMATIC * OCTAVES];
 double rs[CHROMATIC * OCTAVES];
+
+void init_graphics()
+{
+	for (int j = 0; j < CHROMATIC * OCTAVES; j++)
+	{
+		// rs[j] = (radius * pow(ratio, (double)j / CHROMATIC)); // logarithmic spiral
+		// rs[j] = (radius * pow(ratio, j / CHROMATIC)); // logarithmic spiral
+		rs[j] = radius * (1 - 1.0 / (OCTAVES) * ((double)j / CHROMATIC));
+		xs[j] = rs[j] * sin((2 * PI * j * 1) / CHROMATIC);
+		ys[j] = rs[j] * -cos((2 * PI * j * 1) / CHROMATIC);
+	}
+
+	for (int j = 0; j < CHROMATIC * OCTAVES; j++)
+	{
+		double x = ((xs[j] + 1) / 2) * WIDTH; 
+		double y = ((ys[j] + 1) / 2) * HEIGHT;
+		waveforms[2 * waveSize * j + waveSize * (true) + waveOrigin] = 
+				sf::Vertex(sf::Vector2f(x, y), sf::Color(LIGHTNESS, LIGHTNESS, LIGHTNESS, LINEALPHA));
+		waveforms[2 * waveSize * j + waveSize * (false) + waveOrigin] = 
+				sf::Vertex(sf::Vector2f(x, y), sf::Color(LIGHTNESS, LIGHTNESS, LIGHTNESS, LINEALPHA));
+	}
+}
 
 inline int process(const float* in, float* out)
 {
@@ -110,8 +185,11 @@ void coefficients(int base)
 
 Audio A = Audio(process, BSIZE);
 
-int main()
+int main(int argc, char *argv[])
 {
+	args(argc, argv);
+	init_graphics();
+
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 3;
 
@@ -128,27 +206,17 @@ int main()
 	triangle[3].position = sf::Vector2f(WIDTH, 0);
 
 	// define the color of the triangle's points
-	triangle[0].color = sf::Color(DARKNESS, DARKNESS, DARKNESS, ALPHA); // sf::Color(DARKNESS, 0, 0, ALPHA); //::Red; 
-	triangle[1].color = sf::Color(DARKNESS, DARKNESS, DARKNESS, ALPHA); // sf::Color(0, 0, DARKNESS, ALPHA); //::Bue; 
-	triangle[2].color = sf::Color(DARKNESS, DARKNESS, DARKNESS, ALPHA); // sf::Color(0, DARKNESS, 0, ALPHA); //::Green; 
-	triangle[3].color = sf::Color(DARKNESS, DARKNESS, DARKNESS, ALPHA); // sf::Color(DARKNESS, DARKNESS, 0, ALPHA); //::Yellow; 
-
-
-	for (int j = 0; j < CHROMATIC * OCTAVES; j++)
-	{
-		// rs[j] = (radius * pow(ratio, (double)j / CHROMATIC)); // logarithmic spiral
-		// rs[j] = (radius * pow(ratio, j / CHROMATIC)); // logarithmic spiral
-		rs[j] = radius * (1 - 1.0 / (OCTAVES) * ((double)j / CHROMATIC));
-		xs[j] = rs[j] * sin((2 * PI * j * 1) / CHROMATIC);
-		ys[j] = rs[j] * -cos((2 * PI * j * 1) / CHROMATIC);
-	}
+	triangle[0].color = sf::Color(DARKNESS, DARKNESS, DARKNESS, ALPHA); // sf::Color(DARKNESS, 0, 0, ALPHA); //::Red;
+	triangle[1].color = sf::Color(DARKNESS, DARKNESS, DARKNESS, ALPHA); // sf::Color(0, 0, DARKNESS, ALPHA); //::Bue;
+	triangle[2].color = sf::Color(DARKNESS, DARKNESS, DARKNESS, ALPHA); // sf::Color(0, DARKNESS, 0, ALPHA); //::Green;
+	triangle[3].color = sf::Color(DARKNESS, DARKNESS, DARKNESS, ALPHA); // sf::Color(DARKNESS, DARKNESS, 0, ALPHA); //::Yellow;
 
 	slidebank.setup(multiplicity, std::vector<std::complex<double>>(CHROMATIC * OCTAVES, filter_r));
 	oscbank.open();
 	slidebank.open();
 
 	coefficients(pitch);
-	A.startup(CHANS, 1, true); // startup audio engine; CHANS inputs, 1 outputs, console output on
+	A.startup(CHANS, 1, true, DEVICE); // startup audio engine; 4 inputs, 1 outputs, console output on
 
 	while (window.isOpen())
 	{

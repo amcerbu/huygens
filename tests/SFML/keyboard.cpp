@@ -8,36 +8,98 @@
 #include <SFML/Audio.hpp>
 #include <SFML/Network.hpp>
 
-// #include "../../src/delay.h"
-// #include "../../src/filter.h"
 #include "../../src/includes.h"
 #include "../../src/midi.h"
-
-#define RADIUS 100
-#define MARGIN 0.1
-#define kb sf::Keyboard
-#define GUI false // turn gui on?
-
-#define WIDTH (13 + MARGIN) * RADIUS
-#define HEIGHT (5 + MARGIN) * RADIUS
+#include "../../src/argparse.h"
 
 using namespace soundmath;
+#define kb sf::Keyboard
 
-bool focus = true;
-bool focusless = true; // runs without focus
-
+// global variables
 int bottom = 21; // A0
 int shifts = 12;
 int tuning = 5;
 int origin = 36; // C on A string of bass
 int span = 4 * tuning + 12 + shifts * tuning;
 
+// configurable variables
+bool GUI;
+int RADIUS;
+double MARGIN = 0.1;
+int WIDTH; 
+int HEIGHT;
+std::string PORT;
 
+bool focusless; // runs without focus
+
+
+void args(int argc, char *argv[])
+{
+	argparse::ArgumentParser program("keyboard");
+
+	program.add_argument("-g", "--gui")
+		.help("display graphical interface")
+		.default_value(false)
+		.implicit_value(true);
+
+	program.add_argument("-r", "--radius")
+		.default_value<int>(80)
+		.required()
+		.scan<'i', int>()
+		.help("(if gui enabled) graphics size");
+
+	program.add_argument("-f", "--focusless")
+		.help("listen for keypresses without window in focus")
+		.default_value(false)
+		.implicit_value(true);
+
+	program.add_argument("-n", "--names")
+		.help("list midi output port names")
+		.default_value(false)
+		.implicit_value(true);
+
+	program.add_argument("-o", "--outport")
+		.default_value(std::string("IAC Driver Bus 1"))
+		.required()
+		.help("midi output port");
+	try
+	{
+		program.parse_args(argc, argv);
+	}
+	catch (const std::runtime_error& err)
+	{
+		std::cerr << err.what() << std::endl;
+		std::cerr << program;
+		std::exit(1);
+	}
+
+	GUI = program.is_used("-g");
+
+	focusless = program.is_used("-f");
+
+	MidiOut MO;
+	MO.startup();
+	MO.getports(program.is_used("-n"));
+	MO.shutdown();
+
+	RADIUS = program.get<int>("-r");
+
+	PORT = program.get<std::string>("-o");
+
+	if (GUI)
+	{
+		WIDTH = (13 + MARGIN) * RADIUS;
+		HEIGHT = (5 + MARGIN) * RADIUS;
+	}
+	else
+	{
+		HEIGHT = 0;
+		WIDTH = 56;
+	}
+}
 
 std::map<int, int> transpositions; // transpositions from base: of form kb -> int
-
 std::map<int, std::string> glyphs; // transpositions from base: of form kb -> int
-
 std::map<int, std::set<int>> responsible; // key: midi note, value: set of keyboard codes holding
 std::map<int, int> active; // key: midi note, value: number of buttons responsible (positive iff note is active)
 std::map<int, int> deltas; // key: midi note, value: checks whether active goes from 0 to positive or positive to 0
@@ -67,7 +129,7 @@ void dict_init()
 	transpositions[kb::L] = 1 * tuning + 8;				glyphs[kb::L] = "L";
 	transpositions[kb::Semicolon] = 1 * tuning + 9;		glyphs[kb::Semicolon] = ";";
 	transpositions[kb::Quote] = 1 * tuning + 10;		glyphs[kb::Quote] = "'";
-	transpositions[kb::Return] = 1 * tuning + 11;		glyphs[kb::Return] = "Re";
+	transpositions[kb::Return] = 1 * tuning + 11;		glyphs[kb::Return] = "Ret";
 
 	transpositions[kb::Q] = 2 * tuning + 0;				glyphs[kb::Q] = "Q";
 	transpositions[kb::W] = 2 * tuning + 1;				glyphs[kb::W] = "W";
@@ -95,7 +157,7 @@ void dict_init()
 	transpositions[kb::Num0] = 3 * tuning + 9;			glyphs[kb::Num0] = "0";
 	transpositions[kb::Hyphen] = 3 * tuning + 10;		glyphs[kb::Hyphen] = "-";
 	transpositions[kb::Equal] = 3 * tuning + 11;		glyphs[kb::Equal] = "=";
-	transpositions[kb::Backspace] = 3 * tuning + 12;	glyphs[kb::Backspace] = "De";
+	transpositions[kb::Backspace] = 3 * tuning + 12;	glyphs[kb::Backspace] = "Del";
 
 	transpositions[kb::F1] = 4 * tuning + 0;			glyphs[kb::F1] = "F1";
 	transpositions[kb::F2] = 4 * tuning + 1;			glyphs[kb::F2] = "F2";
@@ -106,9 +168,9 @@ void dict_init()
 	transpositions[kb::F7] = 4 * tuning + 6;			glyphs[kb::F7] = "F7";
 	transpositions[kb::F8] = 4 * tuning + 7;			glyphs[kb::F8] = "F8";
 	transpositions[kb::F9] = 4 * tuning + 8;			glyphs[kb::F9] = "F9";
-	transpositions[kb::F10] = 4 * tuning + 9;			glyphs[kb::F10] = "F0";
-	transpositions[kb::F11] = 4 * tuning + 10;			glyphs[kb::F11] = "F1";
-	transpositions[kb::F12] = 4 * tuning + 11;			glyphs[kb::F12] = "F2";
+	transpositions[kb::F10] = 4 * tuning + 9;			glyphs[kb::F10] = "F10";
+	transpositions[kb::F11] = 4 * tuning + 10;			glyphs[kb::F11] = "F11";
+	transpositions[kb::F12] = 4 * tuning + 11;			glyphs[kb::F12] = "F12";
 
 	for (int i = bottom; i < bottom + span; i++)
 	{
@@ -224,31 +286,34 @@ void shape_init()
 
 MidiOut MO = MidiOut();
 
-int main()
+int main(int argc, char *argv[])
 {
+	args(argc, argv);
+
 	const double framerate = 30;
 	sf::Time frametime = sf::microseconds(1000000 / framerate);
 	sf::Clock clock;
 	sf::Text text;
-	sf::Font menlo;
+	sf::Font font;
 
 	dict_init();
 	if (GUI)
 	{
 		shape_init();
-		if (!menlo.loadFromFile("Font.ttf"))
+		if (!font.loadFromFile("Font.ttf"))
 		{
 			std::cout << "Error loading font." << std::endl;
 			return 0;
 		}
 
-		text.setFont(menlo);
+		text.setFont(font);
 		text.setFillColor(sf::Color::White);
+		text.setCharacterSize(RADIUS / 3);
 	}
 
 	MO.startup();
 	MO.getports(false);
-	MO.open("IAC Driver Bus 1");
+	MO.open(PORT);
 
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 1;
@@ -257,8 +322,11 @@ int main()
 		"Typing",
 		sf::Style::Titlebar | sf::Style::Close, settings);
 
+	bool focus = false;
+
 	while (window.isOpen())
 	{
+		bool changed = false;
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
@@ -273,25 +341,37 @@ int main()
 				else if (event.key.code == kb::Up)
 				{
 					if (origin + tuning <= bottom + shifts * tuning)
+					{
+						changed = true;
 						origin += tuning;
+					}
 				}
 
 				else if (event.key.code == kb::Down)
 				{
 					if (origin - tuning >= bottom)
+					{
+						changed = true;
 						origin -= tuning;
+					}
 				}
 
 				else if (event.key.code == kb::Right)
 				{
 					if (origin + 1 <= bottom + shifts * tuning)
+					{
+						changed = true;
 						origin += 1;
+					}
 				}
 
 				else if (event.key.code == kb::Left)
 				{
 					if (origin - 1 >= bottom)
+					{
+						changed = true;
 						origin -= 1;
+					}
 				}
 			}
 
@@ -335,12 +415,14 @@ int main()
 				if (deltas[i] == 1)
 				{
 					// std::cout << i << " pressed." << std::endl;
+					changed = true;
 					std::vector<unsigned char> message({{144, (unsigned char)(i), 127}});
 					MO.send(&message);
 				}
 				else if (deltas[i] == -1)
 				{
 					// std::cout << i << " released." << std::endl;
+					changed = true;
 					std::vector<unsigned char> message({{144, (unsigned char)(i), 0}});
 					MO.send(&message);	
 				}

@@ -7,6 +7,19 @@ namespace graphics
 {
 	class Plotter
 	{
+	public:
+
+		Plotter()
+		{
+
+		}
+
+		~Plotter()
+		{
+
+		}
+
+	private:
 		
 	};
 }

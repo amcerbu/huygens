@@ -1,7 +1,7 @@
 // includes.h
 
-#define PORTAUDIO
 #ifndef INCLUDED
+#define PORTAUDIO
 
 #include <stdexcept>
 #include <iostream>

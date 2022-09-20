@@ -16,7 +16,7 @@
 #include <signal.h>
 
 using namespace soundmath;
-#define BSIZE 64
+#define BSIZE 32
 
 static bool running = true;
 void interrupt(int ignore)
@@ -29,13 +29,13 @@ void interrupt(int ignore)
 
 #define courses 1 // "strings" per notes coursed,
 #define harmonics 1 // overtones
-#define octaves 5 // number of octaves
+#define octaves 4 // number of octaves
 #define division 12 // edo
-#define parities 1
+#define parities 2
 #define N parities * division * octaves * courses * harmonics // lots of filters!
 
 const double detune = 0.125;
-const double frequency = 27.5; // E1
+const double frequency = mtof(28); // E1
 
 
 std::complex<double> gate(std::complex<double> x)
@@ -55,14 +55,13 @@ Signal<double, N> S;
 
 RMS<double> rms;
 Noise<double> noise;
-// Filter<double> smoother({1,-1},{0, -0.9999}); // DC blocker
-Filter<double> smoother({0.01},{0, -0.99}); // low-pass
 
-const double dry = 0;
+const double dry = 2;
+const double gain = 3;
 double the_sample = 0;
 
-const int multiplicity = 6; // low-pass multiplicity
-const double wavelengths = 40;
+const int multiplicity = 4; // low-pass multiplicity
+const double wavelengths = 25;
 // const double wavelengths = 300;
 const double cutoff = 0.999;
 // const double cutoff = 1;
@@ -71,7 +70,7 @@ inline int process(const float* in, float* out)
 {
 	for (int i = 0; i < BSIZE; i++)
 	{
-		double the_sample = limiter(dry * in[i] +
+		double the_sample = limiter(dry * in[i] + gain *
 			mixdown(
 				demodulators(
 					synthesis(),
@@ -194,6 +193,8 @@ int main()
 
 	// diatonize(); // initialize scale
 	// microtonalize();
+
+
 	transpose(&synthesis, transp, 0, true); // set frequencies of backward oscillators
 
 	analysis.open(); // open oscillator banks

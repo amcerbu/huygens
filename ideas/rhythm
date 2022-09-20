@@ -10,7 +10,7 @@ things to improve:
 		can share the data of the current sample count; objects that sleep, e.g. metronomes, can operate using a scheduler
 		instead of checking things once per sample). 
 		i	48000 samples / second * 50 years * 365.24 days / year * 24 hrs / day * 60 mins / hr * 60 secs / min = 75,738,240,000,000 samples
-			a long long has maximum value 2^63 -1, or...													9,223,372,036,854,775,807
+			a long long has maximum value 2^63 -1, or... 9,223,372,036,854,775,807
 2 	make a visual interface (e.g. in javascript?). a first step, for example, is to build a visual interface that mirrors the Launchpad,
 	or the parameters of the granular synth.
 	a	develop a protocol for the visuals and audio to talk to one another
@@ -115,6 +115,11 @@ things to build:
 			a way that the function of the chord isn't changed - e.g., you don't want to allow the program to flat the seven of a major chord, even if that
 			decreases voice-leading distance. or maybe that would never happen, because dominant sevents tend to resolve down to the thirds of the tonic?
 
+	d 	instead of treating chords as a subsets of the scale, it may be more illuminating to consider probability distributions on {1,2,...,12}. a convenient way
+		to model such an object is as an element of RP11, or S11: consider vectors in 12-dimensional space with unit norm; the probability associated to a given
+		pitch is the square of the corresponding entry. this also supplies a continuous interpolation mode, namely movement via so(12, R). can we interpret
+		voiceleading moves in terms of these rotations?
+
 6	transposition engine; timbre transformer; pitch-remapper
 	a	so far, plenty of success with remapping via modulate - low-pass - demodulate. the next
 		question is, can this be improved? perhaps the next things to implement are RMSbank and
@@ -133,5 +138,8 @@ things to build:
 
 chords recognized by ireal pro: (a starting place... not somewhere to end up)
 
-5, 2, add9, +, o, h, sus, ^, -, ^7, -7, 7, 7sus, h7, o7, ^9, ^13, 6, 69, ^7#11, ^9#11, ^7#5, -6, -69, -^7, -^9, -9, -11, -7b5, h9, -b6, -#5, 9, 7b9, 7#9, 7#11, 7b5, 7#5, 9#11, 9b5, 9#5, 7b13, 7#9#5, 7#9b5, 7#9#11, 7b9#11, 7b9b5, 7b9#5, 7b9#9, 7b9b13, 7alt, 13, 13#11, 13b9, 13#9, 7b9sus, 7susadd3, 9sus, 13sus, 7b13sus, 11
+5, 2, add9, +, o, h, sus, ^, -, ^7, -7, 7, 7sus, h7, o7, ^9, ^13, 6, 69, ^7#11, 
+^9#11, ^7#5, -6, -69, -^7, -^9, -9, -11, -7b5, h9, -b6, -#5, 9, 7b9, 7#9, 7#11, 
+7b5, 7#5, 9#11, 9b5, 9#5, 7b13, 7#9#5, 7#9b5, 7#9#11, 7b9#11, 7b9b5, 7b9#5, 
+7b9#9, 7b9b13, 7alt, 13, 13#11, 13b9, 13#9, 7b9sus, 7susadd3, 9sus, 13sus, 7b13sus, 11
 

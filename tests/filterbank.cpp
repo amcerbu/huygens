@@ -5,18 +5,129 @@
 #include "../src/delay.h"
 #include "../src/midi.h"
 #include "../src/rms.h"
+#include "../src/argparse.h"
 
-using namespace soundmath;
-
-using namespace std;
 using namespace soundmath;
 
 #define BSIZE 128
 
+// parameters configurable with command-line args
+int CHANS;
+int INPUT;
+int INDEVICE;
+int OUTDEVICE;
+
+double tail;
+double r;
+
+double noisefloor;
+double air;
+double dry;
+double drive;
+
+// obsolete parameters
+double follow = 0;
+double airmod = 0;
+
+void args(int argc, char *argv[])
+{
+	argparse::ArgumentParser program("filterbank");
+
+	int def_in = 0;
+	int def_out = 0;
+	Audio::initialize(false, &def_in, &def_out);
+
+	program.add_argument("-i", "--input")
+		.default_value<int>((int)def_in)
+		.required()
+		.scan<'i', int>()
+		.help("device id for audio in");
+
+	program.add_argument("-o", "--output")
+		.default_value<int>((int)def_out)
+		.required()
+		.scan<'i', int>()
+		.help("device id for audio out");
+
+	program.add_argument("-f", "--framesize")
+		.default_value<int>(1)
+		.required()
+		.scan<'i', int>()
+		.help("channels per frame");
+
+	program.add_argument("-c", "--channel")
+		.default_value<int>(0)
+		.required()
+		.scan<'i', int>()
+		.help("input channel");
+
+	program.add_argument("-d", "--devices")
+		.help("list audio device names")
+		.default_value(false)
+		.implicit_value(true);
+
+
+	program.add_argument("--tail")
+		.default_value<double>(100)
+		.required()
+		.scan<'f', double>()
+		.help("decay time of filter impulse responses");
+
+	program.add_argument("--floor")
+		.default_value<double>(10)
+		.required()
+		.scan<'f', double>()
+		.help("\"noise floor\" of filterbank");
+
+	program.add_argument("--air")
+		.default_value<double>(0.5)
+		.required()
+		.scan<'f', double>()
+		.help("amount of noisy excitation using rms of input signal");
+
+	program.add_argument("--dry")
+		.default_value<double>(0)
+		.required()
+		.scan<'f', double>()
+		.help("amount of dry signal");
+
+	program.add_argument("--drive")
+		.default_value<double>(5)
+		.required()
+		.scan<'f', double>()
+		.help("boost to dry signal before filtering");
+
+	try
+	{
+		program.parse_args(argc, argv);
+	}
+	catch (const std::runtime_error& err)
+	{
+		std::cerr << err.what() << std::endl;
+		std::cerr << program;
+		std::exit(1);
+	}
+
+	INDEVICE = program.get<int>("-i");
+	OUTDEVICE = program.get<int>("-o");
+	CHANS = program.get<int>("-f");
+	INPUT = program.get<int>("-c");
+	Audio::initialize(!(program.is_used("-i") && program.is_used("-o") && program.is_used("-f") && program.is_used("-c")) || program.is_used("-d"));
+
+
+	tail = program.get<double>("--tail");
+	r = relaxation(tail);
+
+	noisefloor = program.get<double>("--floor");
+	air = program.get<double>("--air");
+	dry = program.get<double>("--dry");
+	drive = program.get<double>("--drive");
+}
+
 static bool running = true;
 void interrupt(int ignore)
 {
-	cout << "\n [keyboard interrupt, exiting ...]" << endl;
+	std::cout << "\n [keyboard interrupt, exiting ...]" << std::endl;
 	running = false;
 }
 
@@ -47,48 +158,36 @@ double saturate(double sample)
 	return 2.0 / PI * atan(2 * PI * sample / 2.0);
 }
 
+
+// signal parameters
 const int courses = 9; // "strings" per notes coursed,
 const int octaves = 8; // number of octaves
 const double division = 12; // edo
-// const double detune = 0.125; // tuning margin of error (fraction of edo)
-const double detune = 0.125;
+const double detune = 0.125; // tuning margin of error (fraction of edo)
 const int N = division * octaves * courses; // lots of filters!
-double frequency = 27.5; // A0
-int A0 = 21;
-double tail = 100;
-double r = relaxation(tail);
 
-double rolloff = 1;
 double gains[N];
 double amplitudes[N];
 
-Filterbank<double> F(2, N, 0.001, 1);
+double frequency = 27.5; // A0
+int A0 = 21;
 
+Filterbank<double> F(2, N, 0.001, 1);
 Noise<double> noise;
 RMS<double> rms;
-// double air = 0;
-double noisefloor = 0;
-double air = 0;
-// double airmod = 0.125;
-double airmod = 0;
-double dry = 0;
-double distorted = 0.1;
-double drive = 5;
-double follow = 0;
 
-double the_sample = 0;
+double out_sample = 0;
 
 inline int process(const float* in, float* out)
 {
 	for (int i = 0; i < BSIZE; i++)
 	{
-		the_sample = softclip(dry * in[i] +
-							 	((1 - follow) + follow * rms(in[i])) * (1 + rms(in[i]) * airmod * noise()) * 
-							 		F(softclip(noisefloor * noise() + drive * in[i] + rms(in[i]) * air * noise()), &softclip), 0.9);
+		double in_sample = in[CHANS * i + INPUT];
+		out_sample = softclip(dry * in_sample +
+							 	((1 - follow) + follow * rms(in_sample)) * (1 + rms(in_sample) * airmod * noise()) * 
+							 		F(softclip(noisefloor * noise() + drive * in_sample + rms(in_sample) * air * noise()), &softclip), 0.9);
 
-		// the_sample = in[i] - (softclip(1000 * (the_sample - in[i]))) * (the_sample - in[i]);
-		// the_sample = softclip(F(noise(), &softclip));
-		out[i] = the_sample;
+		out[i] = out_sample;
 		F.tick();
 		rms.tick();
 	}
@@ -157,8 +256,10 @@ void coefficients()
 Audio A = Audio(process, BSIZE);
 MidiIn MI = MidiIn();
 
-int main()
+int main(int argc, char *argv[])
 {
+	args(argc, argv);
+
 	// bind keyboard interrupt to program exit
 	signal(SIGINT, interrupt);
 
@@ -169,7 +270,7 @@ int main()
 
 	coefficients();
 	memset(amplitudes, 0, sizeof(double) * N);
-	A.startup(1, 1, true); // startup audio engine; 1 input, 1 output, console output on
+	A.startup(CHANS, 1, true, INDEVICE, OUTDEVICE); // startup audio engine; 4 inputs, 1 outputs, console output on
 
 	while (running)
 	{
