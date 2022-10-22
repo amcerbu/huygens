@@ -247,7 +247,8 @@ class Keyboard(Application):
 		self.walking = False # chord buttons rather than pads trigger harmony (raised an octave if true)
 		self.chorale = True # chord qualities are determined procedurally unless other structure is imposed
 		self.mono = True # one chord at a time
-		self.toggle = False
+		self.rootless = False
+		self.melodize = False # melody notes are chosen; chords are supplied underneath
 
 	def suspend(self):
 		super().suspend()
@@ -472,15 +473,20 @@ class Keyboard(Application):
 		condensed = {note % n for chord in self.history for note in chord}
 
 		structures = []
-		for root in roots:
+		for root in roots: # find all upper structures	
 			structure = [(note - root) % n for note in self.harmony if note != root]
 			structures.append(structure)
 
 		options = []
 		for structure in structures:
 			for voicing in self.voicings[len(structure)]:
-				option = harmony.voice(structure, voicing)
-				option = [self.map[pad] + note for note in option]
+				option = harmony.voice(structure, voicing) # this will be sorted
+				if self.melodize:
+					top = option[-1]
+					option = (0,) + option[:-1]
+					option = [self.map[pad] + (note - top) for note in option]
+				else:
+					option = [self.map[pad] + note for note in option]
 				option = [note for note in option if note in self.range]
 				options.append(option)
 

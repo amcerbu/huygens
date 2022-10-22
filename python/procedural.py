@@ -6,6 +6,7 @@ from hierarchy import Hierarchy, distance, permutations, reshapements
 from scoring import *
 import mido
 from time import sleep
+from time import time as microseconds
 
 n = 12
 
@@ -254,17 +255,29 @@ def play(Y, transposition, tempo, port, display, perpetual, driven, rhythmic, rh
     with mido.open_output(port) as output:
         try:
             runs = 0
+            last = microseconds()
+            sleep(tempo)
             while perpetual or runs < 1:
                 old = ()
                 for i, (y, line) in enumerate(zip(Y, display)):
+                    now = microseconds()
+                    
                     new = [note for note in y if not note in old]
                     print(line, end = '' if driven else '\n')
                     for note in new:
                         output.send(mido.Message('note_on', note = note + transposition, velocity = 32, channel = (note + transposition) % n if split else 0))
+                        # sleep(tempo)
 
                     if driven: input()
-                    elif rhythmic: sleep(tempo / rhythm[i % len(rhythm)])
-                    else: sleep(tempo)
+                    elif rhythmic:
+                        delay = tempo / rhythm[i % len(rhythm)]
+                    else:
+                        delay = tempo
+
+                    elapsed = now - last
+                    last = now
+                    # sleep(delay - (elapsed - delay))
+                    sleep(delay)
                     
                     for note in y:
                         output.send(mido.Message('note_off', note = note + transposition, channel = (note + transposition) % n if split else 0))
@@ -290,7 +303,7 @@ if __name__ == "__main__":
         driven = False
         rhythmic = True
         perpetual = True
-        transposition = 48
+        transposition = 36
         
         seed = 6 # None
         X, roots, Y, rhythm, indices = voicelead(*realbook(tune), seed, 3, 2)
@@ -299,6 +312,7 @@ if __name__ == "__main__":
         display = render(Y, transposition, charted, indices)
 
     else:
+        # tempo = 0.1
         tempo = 0.1
         driven = False
         rhythmic = False
@@ -318,7 +332,7 @@ if __name__ == "__main__":
                   reshapements((0,2,4,7,9)),
                   reshapements((0,((2,3),5,7,10))),
                   sum(zip(reshapements((0,(2,((4,9),11,19)))),reshapements((0,(10,((2,3),5,7))))), ()),
-                  sum(zip(reshapements((0,((2,3,5),7,10))), reshapements((0,(2,4,(6,7),11)))), ()),
+                  sum(zip(reshapements((0,((2,(3,(0, 5))),7,10))), reshapements((0,(2,4,(6,7),11)))), ()),
                   reshapements((0,(7,2,(9,4)))),
                   reshapements((0,(2,(4,9),7))),
                   [(major[:]).raw(), (major[:] + 7).raw(), (major[:]).raw(), (minor[:] + 4).raw(),
@@ -326,7 +340,7 @@ if __name__ == "__main__":
                   ((0,2,4,7,9),(1,3,5,6,8,10,11))
                  ]
         
-        score = scores[3]
+        score = scores[5]
         Y = sum(([(Hierarchy(a)).arrange().flatten() for a in reshapements(b)] for b in score), start = [])
 
         display = render(Y, transposition, charted)
@@ -334,4 +348,4 @@ if __name__ == "__main__":
         
         print(f'{round(len(Y) * tempo / 60, 2)} minutes...')
         
-    play(Y, transposition, tempo, port, display, perpetual, driven, rhythmic, rhythm)
+    play(Y, transposition, tempo, port, display, perpetual, driven, rhythmic, rhythm, True)

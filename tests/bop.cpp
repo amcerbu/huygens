@@ -23,6 +23,7 @@ void interrupt(int ignore)
 
 // Subtractive synthesizer parameters
 Metro<double> physics(SR / 8);
+// Subtractive<double> sub(7, 7, 0.7, 0.999995, pow(2.0, 1.0 / 24));
 Subtractive<double> sub(7, 7, 0.7, 0.999995, 1);
 Noise<double> excitation;
 double the_sample;

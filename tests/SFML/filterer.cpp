@@ -13,9 +13,9 @@
 #include "../../src/mixer.h"
 #include "../../src/argparse.h"
 
-#define WIDTH 1600
-#define HEIGHT 1600
-
+#define HIDPI 1
+#define WIDTH 800 * (1 + HIDPI)
+#define HEIGHT 800 * (1 + HIDPI)
 
 #define DARKNESS 255
 #define ALPHA 64
@@ -27,7 +27,7 @@
 #define INCREMENT 1
 
 #define CHROMATIC 12
-#define OCTAVES 3
+#define OCTAVES 2
 // #define HARMONICS 4
 #define A0 21
 

@@ -27,16 +27,22 @@ void interrupt(int ignore)
 	running = false;
 }
 
+// #define courses 1 // "strings" per notes coursed,
+// #define harmonics 8 // overtones
+// #define octaves 1 // number of octaves
+// #define division 12 // edo
+// #define parities 1
+// #define N parities * division * octaves * courses * harmonics // lots of filters!
+
 #define courses 1 // "strings" per notes coursed,
-#define harmonics 1 // overtones
+#define harmonics 1 // number of odd overtones
 #define octaves 4 // number of octaves
 #define division 12 // edo
-#define parities 2
+#define parities 1
 #define N parities * division * octaves * courses * harmonics // lots of filters!
 
 const double detune = 0.125;
 const double frequency = mtof(28); // E1
-
 
 std::complex<double> gate(std::complex<double> x)
 { return (std::abs(x) < 0.0008 ? 0 : x); }
@@ -56,21 +62,37 @@ Signal<double, N> S;
 RMS<double> rms;
 Noise<double> noise;
 
-const double dry = 2;
-const double gain = 3;
+const double dry = 0;
+const double gain = 1;
+const double drive = 2;
 double the_sample = 0;
 
-const int multiplicity = 4; // low-pass multiplicity
-const double wavelengths = 25;
-// const double wavelengths = 300;
+const int multiplicity = 3; // low-pass multiplicity
+
+const double wavelengths = 35;
 const double cutoff = 0.999;
+
+// const double wavelengths = 1000;
 // const double cutoff = 1;
+
+// const double wavelengths = 300;
+// const double cutoff = 1;
+
+double softclip(double sample, double width = 0.9)
+{
+	if (abs(sample) < width)
+		return sample;
+
+	int sign = sgn(sample);
+	double gap = sample - sign * width;
+	return sign * width + (1 - width) * 2.0 / PI * atan(PI * gap / (2 * (1 - width)));
+}
 
 inline int process(const float* in, float* out)
 {
 	for (int i = 0; i < BSIZE; i++)
 	{
-		double the_sample = limiter(dry * in[i] + gain *
+		the_sample = limiter(dry * in[i] + gain * softclip(drive *
 			mixdown(
 				demodulators(
 					synthesis(),
@@ -85,7 +107,7 @@ inline int process(const float* in, float* out)
 						)
 					)
 				)
-			));
+			)));
 
 		out[i] = the_sample;
 
@@ -103,7 +125,7 @@ double transp = 12;
 double scale[division * octaves * harmonics];
 double diatonic[] = {0,2,4,5,7,9,11};
 
-void transpose(Oscbank<double, N>* oscbank, int interval, int spectral, bool reverse = false)
+void transpose(Oscbank<double, N>* oscbank, double interval, int spectral, bool reverse = false)
 {
 	double ratio = pow(2, (double)interval / 12);
 	for (int i = 0; i < division * octaves; i++)
@@ -115,7 +137,7 @@ void transpose(Oscbank<double, N>* oscbank, int interval, int spectral, bool rev
 				for (int l = 0; l < parities; l++)
 				{
 					double midi = (scale[i] + detune * pow((2 * (j + 0.5) / (double)courses - 1), 1)) / division;
-					double partial = frequency * pow(2, midi) * (k + spectral + 1) * ratio * pow(-1, l);
+					double partial = frequency * pow(2, midi) * (2 * k + spectral + 1) * ratio * pow(-1, l);
 	
 					oscbank->freqmod(parities * (harmonics * (courses * i + j) + k) + l, (reverse ? -1 : 1) * partial);
 				}
@@ -135,7 +157,7 @@ void measure(Slidebank<double, N>* slidebank, std::vector<std::complex<double>>&
 				for (int l = 0; l < parities; l++)
 				{
 					double midi = (scale[i] + detune * pow((2 * (j + 0.5) / (double)courses - 1), 1)) / division;
-					double partial = frequency * pow(2, midi) * (k + 1) * pow(-1, l);
+					double partial = frequency * pow(2, midi) * (2 * k + 1) * pow(-1, l);
 
 					radii[parities * (harmonics * (courses * i + j) + k) + l] = 
 						std::min(cutoff, std::exp((std::log(0.5) - multiplicity - 1) / (wavelengths * SR / std::abs(partial))));
@@ -226,7 +248,7 @@ int main()
 			// }
 			// std::cout << std::endl;
 
-			int a;
+			double a;
 			std::cout << "transposition: ";
 			std::cin >> a;
 			transpose(&synthesis, a, 0, true);

@@ -149,7 +149,7 @@ namespace soundmath
 			for (int j = 0; j < overtones; j++)
 			{
 				previous = frequency;
-				frequency = fundamental * pow(j + 1, harmonicity);
+				frequency = fundamental * (1 + pow((double)j / (overtones - 1), harmonicity) * (overtones - 1));
 
 				// if (!stolen)
 					particles[voice * overtones + j].initialize(1, ftom(frequency));

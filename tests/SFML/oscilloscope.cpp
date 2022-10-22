@@ -18,7 +18,6 @@
 #define HEIGHT 600 * 2
 #define RADIUS 100
 
-
 #define DARKNESS 255
 #define ALPHA 127
 #define LINEALPHA 255
