@@ -32,7 +32,7 @@ namespace soundmath
 			memset(amplitudes, 0, voices * sizeof(T));
 
 			for (int i = 0; i < voices * overtones; i++)
-				oscillators[i] = Oscillator<T>();
+				oscillators[i] = Oscillator<T>(0, 0, 0.0001);
 		}
 
 		void tick()

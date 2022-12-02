@@ -14,20 +14,20 @@
 #include "../../src/argparse.h"
 
 #define HIDPI 1
-#define WIDTH 800 * (1 + HIDPI)
-#define HEIGHT 800 * (1 + HIDPI)
+#define WIDTH 1000 * (1 + HIDPI)
+#define HEIGHT 1000 * (1 + HIDPI)
 
 #define DARKNESS 255
 #define ALPHA 64
-#define LINEALPHA 96
+#define LINEALPHA 128
 #define LIGHTNESS 0
 
-#define BSIZE 512
+#define BSIZE 32
 #define FRAMERATE 60
 #define INCREMENT 1
 
 #define CHROMATIC 12
-#define OCTAVES 2
+#define OCTAVES 3
 // #define HARMONICS 4
 #define A0 21
 
@@ -85,7 +85,7 @@ void args(int argc, char *argv[])
 	Audio::initialize(!(program.is_used("-i") && program.is_used("-f") && program.is_used("-c")) || program.is_used("-d"));
 }
 
-
+const bool spiral = false;
 const int waveSize = (SR / INCREMENT) / FRAMERATE;
 sf::Vertex waveforms[2 * waveSize * CHROMATIC * OCTAVES];
 int waveOrigin = 0;
@@ -100,9 +100,9 @@ bool flipped = false;
 int pitch = 24;
 
 // double filter_r = 0.9999;
-// double filter_r = 0.996;
+double filter_r = 0.996;
 // int multiplicity = 3;
-double filter_r = 0.999;
+// double filter_r = 0.999;
 int multiplicity = 1;
 Oscbank<double, CHROMATIC * OCTAVES> oscbank;
 Slidebank<double, CHROMATIC * OCTAVES> slidebank;
@@ -114,13 +114,25 @@ double rs[CHROMATIC * OCTAVES];
 
 void init_graphics()
 {
+	int across = sqrt(CHROMATIC * OCTAVES);
+	int updown = CHROMATIC * OCTAVES / across;
 	for (int j = 0; j < CHROMATIC * OCTAVES; j++)
 	{
 		// rs[j] = (radius * pow(ratio, (double)j / CHROMATIC)); // logarithmic spiral
 		// rs[j] = (radius * pow(ratio, j / CHROMATIC)); // logarithmic spiral
-		rs[j] = radius * (1 - 1.0 / (OCTAVES) * ((double)j / CHROMATIC));
-		xs[j] = rs[j] * sin((2 * PI * j * 1) / CHROMATIC);
-		ys[j] = rs[j] * -cos((2 * PI * j * 1) / CHROMATIC);
+		if (spiral)
+		{
+			rs[j] = radius * (1 - 1.0 / (OCTAVES) * ((double)j / CHROMATIC));
+			xs[j] = rs[j] * sin((2 * PI * j * 1) / CHROMATIC);
+			ys[j] = rs[j] * -cos((2 * PI * j * 1) / CHROMATIC);
+		}
+		else
+		{
+			rs[j] = radius * (1 - 1.0 / (OCTAVES) * ((double)j / CHROMATIC));
+			xs[j] = 1.5 * ((double)(j % across)  / (across - 1) - 0.5);
+			ys[j] = 1.5 * ((double)(j / across) / (updown - 1) - 0.5);	
+		}
+		
 	}
 
 	for (int j = 0; j < CHROMATIC * OCTAVES; j++)
@@ -191,7 +203,7 @@ int main(int argc, char *argv[])
 	init_graphics();
 
 	sf::ContextSettings settings;
-	settings.antialiasingLevel = 3;
+	// settings.antialiasingLevel = 3;
 
 	sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Spiral", sf::Style::Titlebar | sf::Style::Close, settings);
 	// window.setFramerateLimit(FRAMERATE);
@@ -256,6 +268,7 @@ int main(int argc, char *argv[])
 		
 		
 		window.draw(triangle);
+		// window.clear(sf::Color::White);
 		
 		while (!ready)
 		{

@@ -64,18 +64,18 @@ Noise<double> noise;
 
 const double dry = 0;
 const double gain = 1;
-const double drive = 2;
+const double drive = 4;
 double the_sample = 0;
 
-const int multiplicity = 3; // low-pass multiplicity
+const int multiplicity = 2; // low-pass multiplicity
 
-const double wavelengths = 35;
-const double cutoff = 0.999;
+const double wavelengths = 1000;
+const double cutoff = 0.9995;
 
 // const double wavelengths = 1000;
 // const double cutoff = 1;
 
-// const double wavelengths = 300;
+// const double wavelengths = 50;
 // const double cutoff = 1;
 
 double softclip(double sample, double width = 0.9)

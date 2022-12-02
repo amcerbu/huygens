@@ -35,6 +35,7 @@ library = {
     'M79'   : Hierarchy((2,4,7,11)),
     'M7913' : Hierarchy((2,4,7,(10,11))),
     'M79s11': Hierarchy((2,4,(6,7),11)),
+    'M7s11' : Hierarchy((4,(6,7),11)),
     
     'm'     : Hierarchy((3,7)),
     'm7'    : Hierarchy((3,7,10)),
@@ -159,6 +160,21 @@ def realbook(tune):
                 1, 1, 1/2, 1, 1, 1/2, 1, 1, 1/2, 1, 1, 1, 1,
                 2/3, 2, 1, 1, 1/2, 1/2, 2/3, 2, 1/2, 1, 1, 1/2]
 
+    elif tune == 'tom':
+        chart = [(D, library['M']/0), (C, library['M']/0), (G, library['M']/0), 
+                 (D, library['M']/0), (C, library['M']/0), (G, library['M']/0), 
+                 (D, library['M']/0), (C, library['M']/0), (G, library['M']/0), 
+                 (D, library['M']/0), (C, library['M']/0), (G, library['M']/0), 
+                 (E, library['m']/0), (G, library['M']/0), (C, library['M7']/0), (C, library['M7s11']/0),
+                 (D, library['M']/0), (C, library['M']/0), (G, library['M']/0),
+                 (D, library['M']/0), (C, library['M']/0), (G, library['M']/0), 
+                 (D, library['M']/0), (C, library['M']/0), (G, library['M']/0),
+                 (E, library['m']/0), (G, library['M']/0), (C, library['M7']/0), (C, library['M7s11']/0),
+                 (D, library['M']/0), (E, library['m']/0), (D, library['m']/0), (C, library['M7s11']/0), (C, library['M']/0), (G, library['M']/0) ]
+
+        time = [1] * len(chart)
+
+
     return chart, time
 
 def voicelead(chart, time, seed = None, choruses = 1, slop = 1):
@@ -269,15 +285,18 @@ def play(Y, transposition, tempo, port, display, perpetual, driven, rhythmic, rh
                         # sleep(tempo)
 
                     if driven: input()
-                    elif rhythmic:
-                        delay = tempo / rhythm[i % len(rhythm)]
                     else:
-                        delay = tempo
+                        if rhythmic:
+                            delay = tempo / rhythm[i % len(rhythm)]
+                        else:
+                            delay = tempo
 
                     elapsed = now - last
                     last = now
                     # sleep(delay - (elapsed - delay))
-                    sleep(delay)
+
+                    if not driven:
+                        sleep(delay)
                     
                     for note in y:
                         output.send(mido.Message('note_off', note = note + transposition, channel = (note + transposition) % n if split else 0))
@@ -295,18 +314,18 @@ def play(Y, transposition, tempo, port, display, perpetual, driven, rhythmic, rh
 if __name__ == "__main__":
     # port = 'Scarlett 18i8 USB'
     port = 'IAC Driver Bus 1'
-    tune = 'cyclic episode'
-    charted = False
-    rootless = False
+    tune = 'tom'
+    charted = True
+    rootless = True
     if charted:
         tempo = 2.5
-        driven = False
+        driven = True
         rhythmic = True
         perpetual = True
         transposition = 36
         
-        seed = 6 # None
-        X, roots, Y, rhythm, indices = voicelead(*realbook(tune), seed, 3, 2)
+        seed = 1 # None
+        X, roots, Y, rhythm, indices = voicelead(*realbook(tune), seed, 3)
         if not rootless: Y = [(r - n,) + y for r,y in zip(roots, Y)]
 
         display = render(Y, transposition, charted, indices)
@@ -332,7 +351,7 @@ if __name__ == "__main__":
                   reshapements((0,2,4,7,9)),
                   reshapements((0,((2,3),5,7,10))),
                   sum(zip(reshapements((0,(2,((4,9),11,19)))),reshapements((0,(10,((2,3),5,7))))), ()),
-                  sum(zip(reshapements((0,((2,(3,(0, 5))),7,10))), reshapements((0,(2,4,(6,7),11)))), ()),
+                  sum(zip(reshapements((0,((2,(3,(0,5))),7,10))), reshapements((0,(2,4,(6,7),11)))), ()),
                   reshapements((0,(7,2,(9,4)))),
                   reshapements((0,(2,(4,9),7))),
                   [(major[:]).raw(), (major[:] + 7).raw(), (major[:]).raw(), (minor[:] + 4).raw(),
@@ -348,4 +367,4 @@ if __name__ == "__main__":
         
         print(f'{round(len(Y) * tempo / 60, 2)} minutes...')
         
-    play(Y, transposition, tempo, port, display, perpetual, driven, rhythmic, rhythm, True)
+    play(Y, transposition, tempo, port, display, perpetual, driven, rhythmic, rhythm, False)

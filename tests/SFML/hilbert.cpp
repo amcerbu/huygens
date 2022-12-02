@@ -12,8 +12,8 @@
 
 #include "../../src/fourier.h"
 
-#define CHANS 1
-#define INPUT 0
+#define CHANS 2
+#define INPUT 1
 
 #define WIDTH 800 * 2
 #define HEIGHT 600 * 2
@@ -28,11 +28,11 @@ using namespace soundmath;
 #define BSIZE 64
 #define FRAMERATE 60
 
-#define N 65536
+// #define N 65536
 // #define N 16384
-// #define N 4096
+#define N 4096
 // #define N 512
-#define LAPS 2
+#define LAPS 64
 
 inline int f_process(const std::complex<double>* in, std::complex<double>* out)
 {

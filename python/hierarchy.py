@@ -200,3 +200,5 @@ class Hierarchy:
 
         for t in self:
             t.center()
+
+        return self
