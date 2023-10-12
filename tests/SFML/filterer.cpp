@@ -18,7 +18,7 @@
 #define HEIGHT 1000 * (1 + HIDPI)
 
 #define DARKNESS 255
-#define ALPHA 64
+#define ALPHA 96
 #define LINEALPHA 128
 #define LIGHTNESS 0
 

@@ -11,7 +11,7 @@
 #include "../../src/mixer.h"
 #include "../../src/synth.h"
 
-#define CHANS 2
+#define CHANS 1
 #define INPUT 0
 
 #define WIDTH 1600

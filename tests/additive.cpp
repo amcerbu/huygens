@@ -18,9 +18,9 @@ void interrupt(int ignore)
 	running = false;
 }
 
-Metro<double> physics(SR / 8); // rate of physics computation
+Metro<double> physics(24000); // rate of physics computation
 // Metro<double> physics(0);
-Additive<double> addi(&cycle, 10, 7, 0.75, 1.005); // sinusoids, 10 voices, 11 overtones, decay coeff 0.75, harmonicity 1
+Additive<double> addi(&cycle, 10, 7, 0.75, 1.00); // sinusoids, 10 voices, 11 overtones, decay coeff 0.75, harmonicity 1
 
 inline int process(const float* in, float* out)
 {
@@ -43,12 +43,13 @@ void process_midi(MidiIn* device)
 {
 	static vector<unsigned char> message;
 	static int nBytes;
-	static double stamp;
+	// static double stamp;
 
-	stamp = device->get(&message);
+	// stamp = device->get(&message);
+	device->get(&message);
 	nBytes = message.size();
 	int pitch, velocity;
-	double weight;
+	// double weight;
 
 	if (nBytes)
 	{
@@ -67,7 +68,7 @@ void process_midi(MidiIn* device)
 			case aftertouch:
 				pitch = (int)message[1];
 				velocity = (int)message[2];
-				weight = (double)velocity / 127.0;
+				// weight = (double)velocity / 127.0;
 				break;
 
 			default:

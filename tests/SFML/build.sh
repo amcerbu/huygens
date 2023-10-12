@@ -4,7 +4,8 @@
 base=${1%.cpp}
 
 build () {
-	g++ -Wall -O3 -std=c++17 $1 -o $outname -I /usr/local/include/eigen3 -I /usr/local/include/rtmidi -l m -l fftw3 -l portaudio -l ncurses -l rtmidi -l sfml-graphics -l sfml-window -l sfml-system -include ../../src/tinyosc.cpp # -l soundio
+	# g++ -Wall -O3 -std=c++17 $1 -o $outname -I /usr/local/include/eigen3 -I /usr/local/include/rtmidi -l m -l fftw3 -l portaudio -l ncurses -l rtmidi -l sfml-graphics -l sfml-window -l sfml-system -include ../../src/tinyosc.cpp # -l soundio
+	g++ -Wall -O3 -std=c++17 $1 -o $outname -I /opt/homebrew/include -I /opt/homebrew/include/eigen3 -I /opt/homebrew/include/rtmidi -L /opt/homebrew/lib -l m -l fftw3 -l portaudio -l ncurses -l rtmidi -l sfml-graphics -l sfml-window -l sfml-system -include ../../src/tinyosc.cpp # -l soundio
 }
 
 if [ -z "$base" ]

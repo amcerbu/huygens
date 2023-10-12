@@ -111,7 +111,7 @@ namespace soundmath
 		int request(T fundamental, T amplitude = 0)
 		{
 			int voice = -1;
-			bool stolen = false;
+			// bool stolen = false;
 			for (int i = 0; i < voices; i++)
 			{
 				if (!active[i])
@@ -123,7 +123,7 @@ namespace soundmath
 
 			if (voice < 0)
 			{
-				stolen = true;
+				// stolen = true;
 				T pitch = ftom(fundamental);
 				T distance = 0;
 				int nearest = -1;

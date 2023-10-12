@@ -13,8 +13,7 @@ if len(sys.argv) > 1:
 
 print('in: ' + str(surface))
 
-with mido.open_input(surface) as ioport, \
-	 mido.open_output(synth) as output:
+with mido.open_input(surface) as ioport:
 	try:
 		for message in ioport:
 			print(message)

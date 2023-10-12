@@ -17,12 +17,16 @@ elif len(sys.argv) > 2:
 
 print('in: ' + str(surface) + ', out: ' + str(synth))
 
+allowed = ['note_off', 'note_on']
+print(f'Allowed messages: {allowed}')
+
 with mido.open_input(surface) as ioport, \
 	 mido.open_output(synth) as output:
 	try:
 		for message in ioport:
-			print(message)
-			output.send(message)
+			if message.type in allowed:
+				print(message)
+				output.send(message)
 
 	except KeyboardInterrupt:
 		pass

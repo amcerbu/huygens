@@ -29,7 +29,6 @@ double down = 0.0001;
 
 Synth<double> carrier(&cycle, 0);
 
-
 inline int process(const float* in, float* out)
 {
 	for (int i = 0; i < BSIZE; i++)

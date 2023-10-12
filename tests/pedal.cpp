@@ -7,6 +7,7 @@ using namespace std;
 using namespace soundmath;
 
 #define BSIZE 64
+#define OFFSET 1
 
 static bool running = true;
 bool ready = false;
@@ -43,7 +44,7 @@ inline int process(const float* in, float* out)
 	{
 		for (int i = 0; i < BSIZE; i++)
 		{
-			sixty.write(in[i]);
+			sixty.write(in[2 * i + OFFSET]);
 			value = smoother(sixty(0) * sixty(0) + sixty(SR / 240) * sixty(SR / 240));
 
 			double coordinate = (value - sust_thresh) / width;
@@ -113,7 +114,7 @@ int main()
 
 	sixty.initialize(SR / 60);
 
-	A.startup(1, 1, true); // startup audio engine; 1 input, 1 output, console output on
+	A.startup(2, 1, true); // startup audio engine; 1 input, 1 output, console output on
 
 	// set up- and down-threshholds
 	double sust_val, rel_val;

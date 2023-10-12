@@ -59,7 +59,7 @@ namespace soundmath
 		void tick()
 		{
 			(*phases)(*where) *= (*frequencies)(*where);
-			(*phases)(*where) /= (*phases)(*where).abs2();
+			(*phases)(*where) /= (1.0 + (*phases)(*where).abs2()) / 2;
 		}
 
 		const ArrayCT* operator()()

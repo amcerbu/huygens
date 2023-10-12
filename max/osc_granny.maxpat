@@ -3,14 +3,14 @@
 		"fileversion" : 1,
 		"appversion" : 		{
 			"major" : 8,
-			"minor" : 2,
-			"revision" : 0,
+			"minor" : 5,
+			"revision" : 2,
 			"architecture" : "x64",
 			"modernui" : 1
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 34.0, 79.0, 964.0, 937.0 ],
+		"rect" : [ 34.0, 106.0, 964.0, 937.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 1,
 		"default_fontsize" : 12.0,
@@ -140,10 +140,6 @@
 					"presentation" : 1,
 					"presentation_rect" : [ 392.0, -7.0, 15.0, 15.0 ],
 					"saved_attribute_attributes" : 					{
-						"bgoncolor" : 						{
-							"expression" : ""
-						}
-,
 						"activebgcolor" : 						{
 							"expression" : ""
 						}
@@ -153,6 +149,10 @@
 						}
 ,
 						"bgcolor" : 						{
+							"expression" : ""
+						}
+,
+						"bgoncolor" : 						{
 							"expression" : ""
 						}
 ,
@@ -1343,10 +1343,10 @@
 			}
 , 			{
 				"box" : 				{
-					"activedialcolor" : [ 0.820196533203125, 0.848434448242188, 0.843380737304688, 1.0 ],
-					"activefgdialcolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"activeneedlecolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"focusbordercolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"activedialcolor" : [ 0.942648315429688, 0.932855224609375, 0.982180786132812, 1.0 ],
+					"activefgdialcolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"activeneedlecolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"focusbordercolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"id" : "obj-125",
 					"maxclass" : "live.dial",
 					"needlecolor" : [ 0.878105163574219, 0.777690887451172, 0.965782165527344, 1.0 ],
@@ -1362,14 +1362,6 @@
 							"expression" : ""
 						}
 ,
-						"textcolor" : 						{
-							"expression" : ""
-						}
-,
-						"needlecolor" : 						{
-							"expression" : ""
-						}
-,
 						"activefgdialcolor" : 						{
 							"expression" : ""
 						}
@@ -1379,6 +1371,14 @@
 						}
 ,
 						"focusbordercolor" : 						{
+							"expression" : ""
+						}
+,
+						"needlecolor" : 						{
+							"expression" : ""
+						}
+,
+						"textcolor" : 						{
 							"expression" : ""
 						}
 ,
@@ -1394,20 +1394,20 @@
 
 					}
 ,
-					"textcolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"textcolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"varname" : "texture"
 				}
 
 			}
 , 			{
 				"box" : 				{
-					"activebgcolor" : [ 0.530294799804688, 0.572651672363281, 0.565071105957031, 1.0 ],
-					"activebgoncolor" : [ 0.910098266601563, 0.924217224121094, 0.921690368652344, 1.0 ],
-					"activetextcolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"activebgcolor" : [ 0.713972473144531, 0.699282836914063, 0.773271179199219, 1.0 ],
+					"activebgoncolor" : [ 0.971324157714844, 0.966427612304688, 0.991090393066406, 1.0 ],
+					"activetextcolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"activetextoncolor" : [ 0.298655700683594, 0.267864990234375, 0.201638793945313, 1.0 ],
 					"annotation_name" : "active",
-					"bordercolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
-					"focusbordercolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"bordercolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
+					"focusbordercolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"id" : "obj-117",
 					"maxclass" : "live.text",
 					"numinlets" : 1,
@@ -1418,19 +1418,7 @@
 					"presentation" : 1,
 					"presentation_rect" : [ 319.589633725583553, 27.008104503154755, 29.820732548832893, 15.0 ],
 					"saved_attribute_attributes" : 					{
-						"activetextcolor" : 						{
-							"expression" : ""
-						}
-,
-						"textcolor" : 						{
-							"expression" : ""
-						}
-,
 						"activebgcolor" : 						{
-							"expression" : ""
-						}
-,
-						"activetextoncolor" : 						{
 							"expression" : ""
 						}
 ,
@@ -1438,11 +1426,23 @@
 							"expression" : ""
 						}
 ,
-						"focusbordercolor" : 						{
+						"activetextcolor" : 						{
+							"expression" : ""
+						}
+,
+						"activetextoncolor" : 						{
 							"expression" : ""
 						}
 ,
 						"bordercolor" : 						{
+							"expression" : ""
+						}
+,
+						"focusbordercolor" : 						{
+							"expression" : ""
+						}
+,
+						"textcolor" : 						{
 							"expression" : ""
 						}
 ,
@@ -2147,10 +2147,6 @@
 					"presentation" : 1,
 					"presentation_rect" : [ 392.0, 162.0, 15.0, 15.0 ],
 					"saved_attribute_attributes" : 					{
-						"bgoncolor" : 						{
-							"expression" : ""
-						}
-,
 						"activebgcolor" : 						{
 							"expression" : ""
 						}
@@ -2160,6 +2156,10 @@
 						}
 ,
 						"bgcolor" : 						{
+							"expression" : ""
+						}
+,
+						"bgoncolor" : 						{
 							"expression" : ""
 						}
 ,
@@ -2323,13 +2323,13 @@
 			}
 , 			{
 				"box" : 				{
-					"activebgcolor" : [ 0.530294799804688, 0.572651672363281, 0.565071105957031, 1.0 ],
-					"activebgoncolor" : [ 0.910098266601563, 0.924217224121094, 0.921690368652344, 1.0 ],
-					"activetextcolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"activebgcolor" : [ 0.713972473144531, 0.699282836914063, 0.773271179199219, 1.0 ],
+					"activebgoncolor" : [ 0.971324157714844, 0.966427612304688, 0.991090393066406, 1.0 ],
+					"activetextcolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"activetextoncolor" : [ 0.298655700683594, 0.267864990234375, 0.201638793945313, 1.0 ],
 					"annotation_name" : "active",
-					"bordercolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
-					"focusbordercolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"bordercolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
+					"focusbordercolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"id" : "obj-40",
 					"maxclass" : "live.text",
 					"numinlets" : 1,
@@ -2340,19 +2340,7 @@
 					"presentation" : 1,
 					"presentation_rect" : [ 319.589633725583553, 44.008104503154755, 29.820732548832893, 15.0 ],
 					"saved_attribute_attributes" : 					{
-						"activetextcolor" : 						{
-							"expression" : ""
-						}
-,
-						"textcolor" : 						{
-							"expression" : ""
-						}
-,
 						"activebgcolor" : 						{
-							"expression" : ""
-						}
-,
-						"activetextoncolor" : 						{
 							"expression" : ""
 						}
 ,
@@ -2360,11 +2348,23 @@
 							"expression" : ""
 						}
 ,
-						"focusbordercolor" : 						{
+						"activetextcolor" : 						{
+							"expression" : ""
+						}
+,
+						"activetextoncolor" : 						{
 							"expression" : ""
 						}
 ,
 						"bordercolor" : 						{
+							"expression" : ""
+						}
+,
+						"focusbordercolor" : 						{
+							"expression" : ""
+						}
+,
+						"textcolor" : 						{
 							"expression" : ""
 						}
 ,
@@ -2414,10 +2414,10 @@
 			}
 , 			{
 				"box" : 				{
-					"activedialcolor" : [ 0.820196533203125, 0.848434448242188, 0.843380737304688, 1.0 ],
-					"activefgdialcolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"activeneedlecolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"focusbordercolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"activedialcolor" : [ 0.942648315429688, 0.932855224609375, 0.982180786132812, 1.0 ],
+					"activefgdialcolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"activeneedlecolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"focusbordercolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"id" : "obj-185",
 					"maxclass" : "live.dial",
 					"needlecolor" : [ 0.878105163574219, 0.777690887451172, 0.965782165527344, 1.0 ],
@@ -2433,14 +2433,6 @@
 							"expression" : ""
 						}
 ,
-						"textcolor" : 						{
-							"expression" : ""
-						}
-,
-						"needlecolor" : 						{
-							"expression" : ""
-						}
-,
 						"activefgdialcolor" : 						{
 							"expression" : ""
 						}
@@ -2450,6 +2442,14 @@
 						}
 ,
 						"focusbordercolor" : 						{
+							"expression" : ""
+						}
+,
+						"needlecolor" : 						{
+							"expression" : ""
+						}
+,
+						"textcolor" : 						{
 							"expression" : ""
 						}
 ,
@@ -2465,17 +2465,17 @@
 
 					}
 ,
-					"textcolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"textcolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"varname" : "warble"
 				}
 
 			}
 , 			{
 				"box" : 				{
-					"activedialcolor" : [ 0.820196533203125, 0.848434448242188, 0.843380737304688, 1.0 ],
-					"activefgdialcolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"activeneedlecolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"focusbordercolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"activedialcolor" : [ 0.942648315429688, 0.932855224609375, 0.982180786132812, 1.0 ],
+					"activefgdialcolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"activeneedlecolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"focusbordercolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"id" : "obj-184",
 					"maxclass" : "live.dial",
 					"needlecolor" : [ 0.878105163574219, 0.777690887451172, 0.965782165527344, 1.0 ],
@@ -2491,14 +2491,6 @@
 							"expression" : ""
 						}
 ,
-						"textcolor" : 						{
-							"expression" : ""
-						}
-,
-						"needlecolor" : 						{
-							"expression" : ""
-						}
-,
 						"activefgdialcolor" : 						{
 							"expression" : ""
 						}
@@ -2508,6 +2500,14 @@
 						}
 ,
 						"focusbordercolor" : 						{
+							"expression" : ""
+						}
+,
+						"needlecolor" : 						{
+							"expression" : ""
+						}
+,
+						"textcolor" : 						{
 							"expression" : ""
 						}
 ,
@@ -2523,17 +2523,17 @@
 
 					}
 ,
-					"textcolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"textcolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"varname" : "wobble"
 				}
 
 			}
 , 			{
 				"box" : 				{
-					"activedialcolor" : [ 0.820196533203125, 0.848434448242188, 0.843380737304688, 1.0 ],
-					"activefgdialcolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"activeneedlecolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"focusbordercolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"activedialcolor" : [ 0.942648315429688, 0.932855224609375, 0.982180786132812, 1.0 ],
+					"activefgdialcolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"activeneedlecolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"focusbordercolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"id" : "obj-183",
 					"maxclass" : "live.dial",
 					"needlecolor" : [ 0.878105163574219, 0.777690887451172, 0.965782165527344, 1.0 ],
@@ -2549,14 +2549,6 @@
 							"expression" : ""
 						}
 ,
-						"textcolor" : 						{
-							"expression" : ""
-						}
-,
-						"needlecolor" : 						{
-							"expression" : ""
-						}
-,
 						"activefgdialcolor" : 						{
 							"expression" : ""
 						}
@@ -2566,6 +2558,14 @@
 						}
 ,
 						"focusbordercolor" : 						{
+							"expression" : ""
+						}
+,
+						"needlecolor" : 						{
+							"expression" : ""
+						}
+,
+						"textcolor" : 						{
 							"expression" : ""
 						}
 ,
@@ -2582,17 +2582,17 @@
 
 					}
 ,
-					"textcolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"textcolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"varname" : "jitter"
 				}
 
 			}
 , 			{
 				"box" : 				{
-					"activedialcolor" : [ 0.820196533203125, 0.848434448242188, 0.843380737304688, 1.0 ],
-					"activefgdialcolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"activeneedlecolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"focusbordercolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"activedialcolor" : [ 0.942648315429688, 0.932855224609375, 0.982180786132812, 1.0 ],
+					"activefgdialcolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"activeneedlecolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"focusbordercolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"id" : "obj-182",
 					"maxclass" : "live.dial",
 					"needlecolor" : [ 0.878105163574219, 0.777690887451172, 0.965782165527344, 1.0 ],
@@ -2608,14 +2608,6 @@
 							"expression" : ""
 						}
 ,
-						"textcolor" : 						{
-							"expression" : ""
-						}
-,
-						"needlecolor" : 						{
-							"expression" : ""
-						}
-,
 						"activefgdialcolor" : 						{
 							"expression" : ""
 						}
@@ -2625,6 +2617,14 @@
 						}
 ,
 						"focusbordercolor" : 						{
+							"expression" : ""
+						}
+,
+						"needlecolor" : 						{
+							"expression" : ""
+						}
+,
+						"textcolor" : 						{
 							"expression" : ""
 						}
 ,
@@ -2640,17 +2640,17 @@
 
 					}
 ,
-					"textcolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"textcolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"varname" : "spray"
 				}
 
 			}
 , 			{
 				"box" : 				{
-					"activedialcolor" : [ 0.820196533203125, 0.848434448242188, 0.843380737304688, 1.0 ],
-					"activefgdialcolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"activeneedlecolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"focusbordercolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"activedialcolor" : [ 0.942648315429688, 0.932855224609375, 0.982180786132812, 1.0 ],
+					"activefgdialcolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"activeneedlecolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"focusbordercolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"id" : "obj-181",
 					"maxclass" : "live.dial",
 					"needlecolor" : [ 0.878105163574219, 0.777690887451172, 0.965782165527344, 1.0 ],
@@ -2666,14 +2666,6 @@
 							"expression" : ""
 						}
 ,
-						"textcolor" : 						{
-							"expression" : ""
-						}
-,
-						"needlecolor" : 						{
-							"expression" : ""
-						}
-,
 						"activefgdialcolor" : 						{
 							"expression" : ""
 						}
@@ -2683,6 +2675,14 @@
 						}
 ,
 						"focusbordercolor" : 						{
+							"expression" : ""
+						}
+,
+						"needlecolor" : 						{
+							"expression" : ""
+						}
+,
+						"textcolor" : 						{
 							"expression" : ""
 						}
 ,
@@ -2698,17 +2698,17 @@
 
 					}
 ,
-					"textcolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"textcolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"varname" : "scatter"
 				}
 
 			}
 , 			{
 				"box" : 				{
-					"activedialcolor" : [ 0.820196533203125, 0.848434448242188, 0.843380737304688, 1.0 ],
-					"activefgdialcolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"activeneedlecolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"focusbordercolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"activedialcolor" : [ 0.942648315429688, 0.932855224609375, 0.982180786132812, 1.0 ],
+					"activefgdialcolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"activeneedlecolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"focusbordercolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"id" : "obj-180",
 					"maxclass" : "live.dial",
 					"needlecolor" : [ 0.878105163574219, 0.777690887451172, 0.965782165527344, 1.0 ],
@@ -2724,14 +2724,6 @@
 							"expression" : ""
 						}
 ,
-						"textcolor" : 						{
-							"expression" : ""
-						}
-,
-						"needlecolor" : 						{
-							"expression" : ""
-						}
-,
 						"activefgdialcolor" : 						{
 							"expression" : ""
 						}
@@ -2741,6 +2733,14 @@
 						}
 ,
 						"focusbordercolor" : 						{
+							"expression" : ""
+						}
+,
+						"needlecolor" : 						{
+							"expression" : ""
+						}
+,
+						"textcolor" : 						{
 							"expression" : ""
 						}
 ,
@@ -2757,17 +2757,17 @@
 
 					}
 ,
-					"textcolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"textcolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"varname" : "density"
 				}
 
 			}
 , 			{
 				"box" : 				{
-					"activedialcolor" : [ 0.820196533203125, 0.848434448242188, 0.843380737304688, 1.0 ],
-					"activefgdialcolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"activeneedlecolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"focusbordercolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"activedialcolor" : [ 0.942648315429688, 0.932855224609375, 0.982180786132812, 1.0 ],
+					"activefgdialcolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"activeneedlecolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"focusbordercolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"id" : "obj-179",
 					"maxclass" : "live.dial",
 					"needlecolor" : [ 0.878105163574219, 0.777690887451172, 0.965782165527344, 1.0 ],
@@ -2783,14 +2783,6 @@
 							"expression" : ""
 						}
 ,
-						"textcolor" : 						{
-							"expression" : ""
-						}
-,
-						"needlecolor" : 						{
-							"expression" : ""
-						}
-,
 						"activefgdialcolor" : 						{
 							"expression" : ""
 						}
@@ -2800,6 +2792,14 @@
 						}
 ,
 						"focusbordercolor" : 						{
+							"expression" : ""
+						}
+,
+						"needlecolor" : 						{
+							"expression" : ""
+						}
+,
+						"textcolor" : 						{
 							"expression" : ""
 						}
 ,
@@ -2816,17 +2816,17 @@
 
 					}
 ,
-					"textcolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"textcolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"varname" : "size"
 				}
 
 			}
 , 			{
 				"box" : 				{
-					"activedialcolor" : [ 0.820196533203125, 0.848434448242188, 0.843380737304688, 1.0 ],
-					"activefgdialcolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"activeneedlecolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"focusbordercolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"activedialcolor" : [ 0.942648315429688, 0.932855224609375, 0.982180786132812, 1.0 ],
+					"activefgdialcolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"activeneedlecolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"focusbordercolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"id" : "obj-177",
 					"maxclass" : "live.dial",
 					"needlecolor" : [ 0.878105163574219, 0.777690887451172, 0.965782165527344, 1.0 ],
@@ -2842,14 +2842,6 @@
 							"expression" : ""
 						}
 ,
-						"textcolor" : 						{
-							"expression" : ""
-						}
-,
-						"needlecolor" : 						{
-							"expression" : ""
-						}
-,
 						"activefgdialcolor" : 						{
 							"expression" : ""
 						}
@@ -2859,6 +2851,14 @@
 						}
 ,
 						"focusbordercolor" : 						{
+							"expression" : ""
+						}
+,
+						"needlecolor" : 						{
+							"expression" : ""
+						}
+,
+						"textcolor" : 						{
 							"expression" : ""
 						}
 ,
@@ -2875,17 +2875,17 @@
 
 					}
 ,
-					"textcolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"textcolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"varname" : "transp"
 				}
 
 			}
 , 			{
 				"box" : 				{
-					"activedialcolor" : [ 0.820196533203125, 0.848434448242188, 0.843380737304688, 1.0 ],
-					"activefgdialcolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"activeneedlecolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"focusbordercolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"activedialcolor" : [ 0.942648315429688, 0.932855224609375, 0.982180786132812, 1.0 ],
+					"activefgdialcolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"activeneedlecolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"focusbordercolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"id" : "obj-176",
 					"maxclass" : "live.dial",
 					"needlecolor" : [ 0.878105163574219, 0.777690887451172, 0.965782165527344, 1.0 ],
@@ -2901,14 +2901,6 @@
 							"expression" : ""
 						}
 ,
-						"textcolor" : 						{
-							"expression" : ""
-						}
-,
-						"needlecolor" : 						{
-							"expression" : ""
-						}
-,
 						"activefgdialcolor" : 						{
 							"expression" : ""
 						}
@@ -2918,6 +2910,14 @@
 						}
 ,
 						"focusbordercolor" : 						{
+							"expression" : ""
+						}
+,
+						"needlecolor" : 						{
+							"expression" : ""
+						}
+,
+						"textcolor" : 						{
 							"expression" : ""
 						}
 ,
@@ -2933,17 +2933,17 @@
 
 					}
 ,
-					"textcolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"textcolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"varname" : "shape"
 				}
 
 			}
 , 			{
 				"box" : 				{
-					"activedialcolor" : [ 0.820196533203125, 0.848434448242188, 0.843380737304688, 1.0 ],
-					"activefgdialcolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"activeneedlecolor" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 1.0 ],
-					"focusbordercolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"activedialcolor" : [ 0.942648315429688, 0.932855224609375, 0.982180786132812, 1.0 ],
+					"activefgdialcolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"activeneedlecolor" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 1.0 ],
+					"focusbordercolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"id" : "obj-171",
 					"maxclass" : "live.dial",
 					"needlecolor" : [ 0.878105163574219, 0.777690887451172, 0.965782165527344, 1.0 ],
@@ -2959,14 +2959,6 @@
 							"expression" : ""
 						}
 ,
-						"textcolor" : 						{
-							"expression" : ""
-						}
-,
-						"needlecolor" : 						{
-							"expression" : ""
-						}
-,
 						"activefgdialcolor" : 						{
 							"expression" : ""
 						}
@@ -2976,6 +2968,14 @@
 						}
 ,
 						"focusbordercolor" : 						{
+							"expression" : ""
+						}
+,
+						"needlecolor" : 						{
+							"expression" : ""
+						}
+,
+						"textcolor" : 						{
 							"expression" : ""
 						}
 ,
@@ -2990,7 +2990,7 @@
 
 					}
 ,
-					"textcolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"textcolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"varname" : "pan"
 				}
 
@@ -3010,7 +3010,7 @@
 , 			{
 				"box" : 				{
 					"annotation" : "",
-					"focusbordercolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
+					"focusbordercolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
 					"id" : "obj-123",
 					"maxclass" : "live.slider",
 					"numinlets" : 1,
@@ -3022,15 +3022,15 @@
 					"presentation_rect" : [ 364.0, 25.5, 31.0, 119.0 ],
 					"prototypename" : "time",
 					"saved_attribute_attributes" : 					{
+						"focusbordercolor" : 						{
+							"expression" : ""
+						}
+,
 						"textcolor" : 						{
 							"expression" : ""
 						}
 ,
 						"tricolor" : 						{
-							"expression" : ""
-						}
-,
-						"focusbordercolor" : 						{
 							"expression" : ""
 						}
 ,
@@ -3049,8 +3049,8 @@
 
 					}
 ,
-					"textcolor" : [ 0.210098266601562, 0.224217224121094, 0.221690368652344, 1.0 ],
-					"tricolor" : [ 0.820196533203125, 0.848434448242188, 0.843380737304688, 1.0 ],
+					"textcolor" : [ 0.271324157714844, 0.266427612304687, 0.291090393066406, 1.0 ],
+					"tricolor" : [ 0.942648315429688, 0.932855224609375, 0.982180786132812, 1.0 ],
 					"varname" : "gain"
 				}
 
@@ -3162,8 +3162,8 @@
 						"fileversion" : 1,
 						"appversion" : 						{
 							"major" : 8,
-							"minor" : 2,
-							"revision" : 0,
+							"minor" : 5,
+							"revision" : 2,
 							"architecture" : "x64",
 							"modernui" : 1
 						}
@@ -3453,7 +3453,7 @@
 					"presentation" : 1,
 					"presentation_rect" : [ 5.0, -1.0, 360.0, 180.0 ],
 					"subplots" : [ 						{
-							"color" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 0.5 ],
+							"color" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 0.5 ],
 							"thickness" : 1.0,
 							"point_style" : "none",
 							"line_style" : "curve",
@@ -3473,7 +3473,7 @@
 							"origin_y" : 0.0
 						}
 , 						{
-							"color" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 0.5 ],
+							"color" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 0.5 ],
 							"thickness" : 1.0,
 							"point_style" : "none",
 							"line_style" : "curve",
@@ -3493,7 +3493,7 @@
 							"origin_y" : 0.0
 						}
 , 						{
-							"color" : [ 0.275245666503906, 0.310543060302734, 0.304225921630859, 0.5 ],
+							"color" : [ 0.428310394287109, 0.416069030761719, 0.477725982666016, 0.5 ],
 							"thickness" : 1.0,
 							"point_style" : "none",
 							"line_style" : "curve",
@@ -3543,7 +3543,7 @@
 , 			{
 				"box" : 				{
 					"angle" : 270.0,
-					"bgcolor" : [ 0.530294799804688, 0.572651672363281, 0.565071105957031 ],
+					"bgcolor" : [ 0.713972473144531, 0.699282836914063, 0.773271179199219 ],
 					"bordercolor" : [ 0.596063995361328, 0.380609130859375, 0.268259429931641, 1.0 ],
 					"id" : "obj-89",
 					"maxclass" : "panel",
@@ -5188,18 +5188,15 @@
 		}
 ,
 		"dependency_cache" : [ 			{
-				"name" : "transratio.maxpat",
-				"bootpath" : "~/Library/Application Support/Cycling '74/Max 8/Examples/max-tricks/notes-and-pitch/pitch-to-freq-ratio",
-				"patcherrelativepath" : "../../../../Library/Application Support/Cycling '74/Max 8/Examples/max-tricks/notes-and-pitch/pitch-to-freq-ratio",
+				"name" : "o.accum.maxpat",
+				"bootpath" : "~/Documents/Max 8/Packages/odot/patchers/namespace",
+				"patcherrelativepath" : "../../../Documents/Max 8/Packages/odot/patchers/namespace",
 				"type" : "JSON",
 				"implicit" : 1
 			}
 , 			{
-				"name" : "o.accum.maxpat",
-				"bootpath" : "~/Documents/Max 8/Packages/CNMAT/Music-and-Computing/patchers/gatherers",
-				"patcherrelativepath" : "../../../../Documents/Max 8/Packages/CNMAT/Music-and-Computing/patchers/gatherers",
-				"type" : "JSON",
-				"implicit" : 1
+				"name" : "o.compose.mxo",
+				"type" : "iLaX"
 			}
 , 			{
 				"name" : "o.display.mxo",
@@ -5214,8 +5211,11 @@
 				"type" : "iLaX"
 			}
 , 			{
-				"name" : "o.compose.mxo",
-				"type" : "iLaX"
+				"name" : "transratio.maxpat",
+				"bootpath" : "~/Library/Application Support/Cycling '74/Max 8/Examples/max-tricks/notes-and-pitch/pitch-to-freq-ratio",
+				"patcherrelativepath" : "../../../Library/Application Support/Cycling '74/Max 8/Examples/max-tricks/notes-and-pitch/pitch-to-freq-ratio",
+				"type" : "JSON",
+				"implicit" : 1
 			}
  ],
 		"autosave" : 0

@@ -314,17 +314,17 @@ def play(Y, transposition, tempo, port, display, perpetual, driven, rhythmic, rh
 if __name__ == "__main__":
     # port = 'Scarlett 18i8 USB'
     port = 'IAC Driver Bus 1'
-    tune = 'giant steps'
+    tune = 'tom'
     charted = True
-    rootless = False
+    rootless = True
     if charted:
-        tempo = 5.5
-        driven = False
+        tempo = 2.5
+        driven = True
         rhythmic = True
         perpetual = True
         transposition = 36
         
-        seed = None
+        seed = 1 # None
         X, roots, Y, rhythm, indices = voicelead(*realbook(tune), seed, 3)
         if not rootless: Y = [(r - n,) + y for r,y in zip(roots, Y)]
 

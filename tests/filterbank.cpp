@@ -9,7 +9,7 @@
 
 using namespace soundmath;
 
-#define BSIZE 128
+#define BSIZE 64
 
 // parameters configurable with command-line args
 int CHANS;
@@ -68,19 +68,19 @@ void args(int argc, char *argv[])
 
 
 	program.add_argument("--tail")
-		.default_value<double>(100)
+		.default_value<double>(50)
 		.required()
 		.scan<'f', double>()
 		.help("decay time of filter impulse responses");
 
 	program.add_argument("--floor")
-		.default_value<double>(10)
+		.default_value<double>(0)
 		.required()
 		.scan<'f', double>()
 		.help("\"noise floor\" of filterbank");
 
 	program.add_argument("--air")
-		.default_value<double>(0.5)
+		.default_value<double>(5)
 		.required()
 		.scan<'f', double>()
 		.help("amount of noisy excitation using rms of input signal");
@@ -162,9 +162,10 @@ double saturate(double sample)
 // signal parameters
 const int courses = 9; // "strings" per notes coursed,
 const int octaves = 8; // number of octaves
-const double division = 12; // edo
+const int division = 12; // edo
 const double detune = 0.125; // tuning margin of error (fraction of edo)
 const int N = division * octaves * courses; // lots of filters!
+
 
 double gains[N];
 double amplitudes[N];
@@ -172,7 +173,8 @@ double amplitudes[N];
 double frequency = 27.5; // A0
 int A0 = 21;
 
-Filterbank<double> F(2, N, 0.001, 1);
+// Filterbank<double> F(2, N, 0.001, 1);
+FFilterbank<double, N, 2> F(0.001, 1);
 Noise<double> noise;
 RMS<double> rms;
 
