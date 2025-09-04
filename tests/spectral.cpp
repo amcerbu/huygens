@@ -12,13 +12,13 @@ using namespace soundmath;
 #define BSIZE 256
 // #define N 4096
 // #define N 2048
-// #define N 8192
+#define N 8192
 // #define N 16384
-#define N 65536
+// #define N 65536
 // #define N 262144
 // #define LAPS 4
-#define LAPS 16
-// #define LAPS 32
+// #define LAPS 16
+#define LAPS 32
 
 static bool running = true;
 void interrupt(int ignore)
@@ -43,24 +43,36 @@ inline int f_process(const complex<double>* in, complex<double>* out)
 
 	for (int i = 0; i < N; i++)
 	{
-		if (norm(in[i]) < 100 * average * average)
+		if (norm(in[i]) > 625 * average * average)
 		{
-			out[i] = in[i] / 100.0;
+			// out[i] = in[i] / 100.0;
 			// out[i] = 0;
-			// out[i] = in[i];
+			out[i] = in[i];
 		}
 		else
 		{
-			out[i] = in[i];
-			// out[i] = 0;
+			// out[i] = in[i];
+			out[i] = 0;
 		}
 	}
+
+	// for (int i = 0; i < N; i++)
+	// {
+	// 	if (norm(in[i]) >= 0)
+	// 	{
+	// 		out[i] = abs(in[i]);
+	// 	}
+	// 	else
+	// 	{
+	// 		out[i] = 0;
+	// 	}
+	// }
 
 	return 0;
 }
 
 // double the_ratio = 0.5;
-double the_ratio = 5;
+double the_ratio = 1;
 
 Fourier F1 = Fourier(f_process, N, LAPS);
 Fourier F2 = Fourier(f_process, N, LAPS);
@@ -86,10 +98,10 @@ inline int process(const float* in, float* out)
 
 		double real, imag;
 		F1.read(&real, &imag);
-		sample1 = out[2 * i] = limiter(the_ratio * real); // + delay1(in[2 * i]));
+		sample1 = out[2 * i] = the_ratio * real; // + delay1(in[2 * i]));
 
 		F2.read(&real, &imag);
-		sample2 = out[2 * i + 1] = limiter(the_ratio * real); // + delay2(in[2 * i + 1]));;
+		sample2 = out[2 * i + 1] = the_ratio * real; // + delay2(in[2 * i + 1]));;
 	}
 
 	return 0;

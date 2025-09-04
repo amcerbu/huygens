@@ -12,8 +12,10 @@ using namespace soundmath;
 #define BSIZE 64
 
 // parameters configurable with command-line args
-int CHANS;
+int INCHANS;
+int OUTCHANS;
 int INPUT;
+int OUTPUT;
 int INDEVICE;
 int OUTDEVICE;
 
@@ -49,17 +51,29 @@ void args(int argc, char *argv[])
 		.scan<'i', int>()
 		.help("device id for audio out");
 
-	program.add_argument("-f", "--framesize")
+	program.add_argument("-if", "--framesin")
 		.default_value<int>(1)
 		.required()
 		.scan<'i', int>()
-		.help("channels per frame");
+		.help("channels per input frame");
 
-	program.add_argument("-c", "--channel")
+	program.add_argument("-ic", "--inchannel")
 		.default_value<int>(0)
 		.required()
 		.scan<'i', int>()
 		.help("input channel");
+
+	program.add_argument("-of", "--oframesut")
+		.default_value<int>(1)
+		.required()
+		.scan<'i', int>()
+		.help("channels per output frame");
+
+	program.add_argument("-oc", "--outchannel")
+		.default_value<int>(0)
+		.required()
+		.scan<'i', int>()
+		.help("output channel");
 
 	program.add_argument("-d", "--devices")
 		.help("list audio device names")
@@ -110,9 +124,12 @@ void args(int argc, char *argv[])
 
 	INDEVICE = program.get<int>("-i");
 	OUTDEVICE = program.get<int>("-o");
-	CHANS = program.get<int>("-f");
-	INPUT = program.get<int>("-c");
-	Audio::initialize(!(program.is_used("-i") && program.is_used("-o") && program.is_used("-f") && program.is_used("-c")) || program.is_used("-d"));
+	INCHANS = program.get<int>("-if");
+	INPUT = program.get<int>("-ic");
+	OUTCHANS = program.get<int>("-of");
+	OUTPUT = program.get<int>("-oc");
+
+	Audio::initialize(!(program.is_used("-i") && program.is_used("-o") && program.is_used("-if") && program.is_used("-ic")) || program.is_used("-d"));
 
 
 	tail = program.get<double>("--tail");
@@ -184,12 +201,12 @@ inline int process(const float* in, float* out)
 {
 	for (int i = 0; i < BSIZE; i++)
 	{
-		double in_sample = in[CHANS * i + INPUT];
+		double in_sample = in[INCHANS * i + INPUT];
 		out_sample = softclip(dry * in_sample +
 							 	((1 - follow) + follow * rms(in_sample)) * (1 + rms(in_sample) * airmod * noise()) * 
 							 		F(softclip(noisefloor * noise() + drive * in_sample + rms(in_sample) * air * noise()), &softclip), 0.9);
 
-		out[i] = out_sample;
+		out[OUTCHANS * i + OUTPUT] = out_sample;
 		F.tick();
 		rms.tick();
 	}
@@ -272,7 +289,7 @@ int main(int argc, char *argv[])
 
 	coefficients();
 	memset(amplitudes, 0, sizeof(double) * N);
-	A.startup(CHANS, 1, true, INDEVICE, OUTDEVICE); // startup audio engine; 4 inputs, 1 outputs, console output on
+	A.startup(INCHANS, OUTCHANS, true, INDEVICE, OUTDEVICE); // startup audio engine; 4 inputs, 1 outputs, console output on
 
 	while (running)
 	{
